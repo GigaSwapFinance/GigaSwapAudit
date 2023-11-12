@@ -1,0 +1,19 @@
+# testing
+coverage
+
+# truffle
+build
+
+# environment variables
+.env
+
+#Hardhat files
+cache
+artifacts
+
+secrets.json
+
+#Buidler files
+cache
+artifacts
+node_modules
