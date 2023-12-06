@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.17;
 
+import 'contracts/lib/ReentrancyGuard.sol';
 import 'contracts/position_trading/algorithms/PositionAlgorithm.sol';
 import 'contracts/position_trading/IPositionsController.sol';
 import 'contracts/position_trading/PositionSnapshot.sol';
@@ -62,7 +63,12 @@ struct PositionAddingAssets {
 /// 15 - block use limit
 /// 16 - add liquidity calculated countB is zero
 /// 17 - add liquidity assetA count is zero
-contract TradingPairAlgorithm is PositionAlgorithm, ITradingPairAlgorithm {
+/// 18 - has no output count
+contract TradingPairAlgorithm is
+    ReentrancyGuard,
+    PositionAlgorithm,
+    ITradingPairAlgorithm
+{
     using ItemRefAsAssetLibrary for ItemRef;
 
     uint256 public constant priceDecimals = 1e18;
@@ -181,7 +187,7 @@ contract TradingPairAlgorithm is PositionAlgorithm, ITradingPairAlgorithm {
     ) external payable returns (uint256 ethSurplus) {
         ethSurplus = msg.value;
         // position must be created
-        require(address(liquidityTokens[positionId]) != address(0), '#12');
+        require(address(liquidityTokens[positionId]) != address(0), '12');
         AddLiquidityVars memory vars;
         vars.assetBCode = 1;
         if (assetCode == vars.assetBCode) vars.assetBCode = 2;
@@ -197,9 +203,9 @@ contract TradingPairAlgorithm is PositionAlgorithm, ITradingPairAlgorithm {
         // take total supply of liquidity tokens
         IErc20ForFactory liquidityToken = liquidityTokens[positionId];
 
-        require(assetA.count() > 0, '#17');
+        require(assetA.count() > 0, '17');
         vars.countB = (count * assetB.count()) / assetA.count();
-        require(vars.countB > 0, '#16');
+        require(vars.countB > 0, '16');
 
         // save the last asset count
         vars.lastAssetACount = assetA.count();
@@ -216,8 +222,8 @@ contract TradingPairAlgorithm is PositionAlgorithm, ITradingPairAlgorithm {
         ethSurplus = positionsController.transferToAssetFrom{
             value: ethSurplus
         }(msg.sender, positionId, vars.assetBCode, vars.countB, data);
-        require(assetA.count() == vars.lastCountA + count, '#13');
-        require(assetB.count() == vars.lastCountB + vars.countB, '#14');
+        require(assetA.count() == vars.lastCountA + count, '13');
+        require(assetB.count() == vars.lastCountB + vars.countB, '14');
         assetA.setNotifyListener(true);
         assetB.setNotifyListener(true);
         // mint liquidity tokens
@@ -292,7 +298,7 @@ contract TradingPairAlgorithm is PositionAlgorithm, ITradingPairAlgorithm {
         (ItemRef memory asset1, ItemRef memory asset2) = _getAssets(positionId);
         uint256 ownerCount = asset1.count();
         uint256 outputCount = asset2.count();
-        require(outputCount > 0, 'has no output count');
+        require(outputCount > 0, '18');
         return ownerCount / outputCount;
     }
 
@@ -308,7 +314,7 @@ contract TradingPairAlgorithm is PositionAlgorithm, ITradingPairAlgorithm {
         (ItemRef memory asset1, ItemRef memory asset2) = _getAssets(positionId);
         uint256 ownerCount = asset1.count();
         uint256 outputCount = asset2.count();
-        require(outputCount > 0, 'has no output count');
+        require(outputCount > 0, '18');
         return outputCount / ownerCount;
     }
 
@@ -354,9 +360,9 @@ contract TradingPairAlgorithm is PositionAlgorithm, ITradingPairAlgorithm {
         // transfers from assets are not processed
         if (arg.from == asset1.addr || arg.from == asset2.addr) return;
         // swap only if editing is locked
-        require(_positionLocked(arg.positionId), '#8');
+        require(_positionLocked(arg.positionId), '8');
         // if there is no snapshot, then we do nothing
-        require(arg.data.length == 3, '#9');
+        require(arg.data.length == 3, '9');
 
         // take fee
         FeeSettings memory feeSettings = fee[arg.positionId];
@@ -373,7 +379,7 @@ contract TradingPairAlgorithm is PositionAlgorithm, ITradingPairAlgorithm {
         }
         if (arg.assetCode == 2) {
             // if the exchange is direct
-            require(!constraints[arg.positionId].disableForwardSwap, '#10');
+            require(!constraints[arg.positionId].disableForwardSwap, '10');
             _swap(
                 arg.positionId,
                 arg.from,
@@ -387,7 +393,7 @@ contract TradingPairAlgorithm is PositionAlgorithm, ITradingPairAlgorithm {
                 feeDistributerAsset1
             );
         } else {
-            require(!constraints[arg.positionId].disableBackSwap, '#11');
+            require(!constraints[arg.positionId].disableBackSwap, '11');
             _swap(
                 arg.positionId,
                 arg.from,
@@ -416,7 +422,7 @@ contract TradingPairAlgorithm is PositionAlgorithm, ITradingPairAlgorithm {
         ItemRef memory outputFeeAsset
     ) internal {
         // use blockLimit
-        require(lastUseBlocks[positionId][from] + 1 < block.number, '#15');
+        require(lastUseBlocks[positionId][from] + 1 < block.number, '15');
         lastUseBlocks[positionId][from] = block.number;
         SwapVars memory vars;
         // count how much bought
@@ -426,7 +432,7 @@ contract TradingPairAlgorithm is PositionAlgorithm, ITradingPairAlgorithm {
             input.count(),
             output.count()
         );
-        require(vars.buyCount <= output.count(), '#5');
+        require(vars.buyCount <= output.count(), '5');
 
         // count the old price
         vars.lastPrice = (vars.inputlastCount * priceDecimals) / output.count();
@@ -470,13 +476,13 @@ contract TradingPairAlgorithm is PositionAlgorithm, ITradingPairAlgorithm {
             vars.slippage = (vars.lastPrice * priceDecimals) / vars.snapPrice;
         else vars.slippage = (vars.snapPrice * priceDecimals) / vars.lastPrice;
 
-        require(vars.slippage <= snapshot.slippage, '#6');
+        require(vars.slippage <= snapshot.slippage, '6');
 
         // price should not change more than 50%
         vars.priceImpact = (vars.newPrice * priceDecimals) / vars.lastPrice;
         require(
             vars.priceImpact <= priceDecimals + priceDecimals / 2, // 150% of priceDecimals
-            '#7'
+            '7'
         );
 
         // event
@@ -506,16 +512,19 @@ contract TradingPairAlgorithm is PositionAlgorithm, ITradingPairAlgorithm {
         }
     }
 
-    function withdraw(uint256 positionId, uint256 liquidityCount) external {
+    function withdraw(
+        uint256 positionId,
+        uint256 liquidityCount
+    ) external nonReentrant {
         // take a tokens
         IErc20ForFactory liquidityToken = liquidityTokens[positionId];
         IErc20ForFactory feeToken = feeTokens[positionId];
-        require(address(liquidityToken) != address(0), '#1');
-        require(liquidityToken.balanceOf(msg.sender) >= liquidityCount, '#2');
+        require(address(liquidityToken) != address(0), '1');
+        require(liquidityToken.balanceOf(msg.sender) >= liquidityCount, '2');
         require(
             address(feeToken) == address(0) ||
                 feeToken.balanceOf(msg.sender) >= liquidityCount,
-            '#4'
+            '4'
         );
         // take assets
         (ItemRef memory own, ItemRef memory out) = _getAssets(positionId);
@@ -548,7 +557,7 @@ contract TradingPairAlgorithm is PositionAlgorithm, ITradingPairAlgorithm {
         uint256 assetCode,
         uint256 count
     ) external view {
-        require(!this.positionLocked(asset.getPositionId()), '#3');
+        require(!this.positionLocked(asset.getPositionId()), '3');
     }
 
     function getSnapshot(

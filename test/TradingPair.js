@@ -137,7 +137,7 @@ describe("TradingPair:", function () {
         await token1.connect(acc2).approve(erc20AssetsController.address, swapCount);
         await expect(positionsController.connect(acc2)
             .transferToAsset(positionId, 2, swapCount, snap))
-            .to.be.revertedWith('#7');
+            .to.be.revertedWith('7');
     });
 
     it("свап (тратим токен получаем эфир)", async function () {
@@ -687,10 +687,10 @@ describe("TradingPair:", function () {
         it("вывести ассеты нельзя", async () => {
             await expect(positionsController.withdraw(positionId, 1,
                 await positionsController.count([asset1.addr, asset1.id])))
-                .to.be.revertedWith('#3');
+                .to.be.revertedWith('3');
             await expect(positionsController.withdraw(positionId, 2,
                 await positionsController.count([asset2.addr, asset2.id])))
-                .to.be.revertedWith('#3');
+                .to.be.revertedWith('3');
         });
         it("проверка слишком большого влияния на цену - не прокатит более 50%", async () => {
             // читаем снапшот c 100% слипейдж
@@ -701,7 +701,7 @@ describe("TradingPair:", function () {
             await token2.connect(acc2).approve(erc20AssetsController.address, swapCount);
             await expect(positionsController.connect(acc2)
                 .transferToAsset(positionId, 2, swapCount, snap))
-                .to.be.revertedWith('#7');
+                .to.be.revertedWith('7');
         });
 
         describe("производим покупку 2 акком", async () => {
@@ -999,7 +999,7 @@ describe("TradingPair:", function () {
         await positionsController.connect(acc2)
             .transferToAsset(positionId, 2, swapCount / 2, snap);
         await expect(positionsController.connect(acc2)
-            .transferToAsset(positionId, 2, swapCount / 2, snap)).to.be.revertedWith('#15');
+            .transferToAsset(positionId, 2, swapCount / 2, snap)).to.be.revertedWith('15');
         await positionsController.connect(acc2)
             .transferToAsset(positionId, 2, swapCount / 2, snap)
     });
@@ -1034,7 +1034,7 @@ describe("TradingPair:", function () {
         await token2.connect(acc2).mint(swapCount);
         await token2.connect(acc2).approve(erc20AssetsController.address, swapCount);
         await expect(positionsController.connect(acc2)
-            .transferToAsset(positionId, 2, swapCount, snap)).to.be.revertedWith('#10');
+            .transferToAsset(positionId, 2, swapCount, snap)).to.be.revertedWith('10');
     });
 
     it("ограничитель обратного свапа", async () => {
@@ -1067,7 +1067,7 @@ describe("TradingPair:", function () {
         await token1.connect(acc2).mint(swapCount);
         await token1.connect(acc2).approve(erc20AssetsController.address, swapCount);
         await expect(positionsController.connect(acc2)
-            .transferToAsset(positionId, 1, swapCount, snap)).to.be.revertedWith('#11');
+            .transferToAsset(positionId, 1, swapCount, snap)).to.be.revertedWith('11');
     });
 
     it("ограничитель создания полностью блокированной позиции", async () => {
