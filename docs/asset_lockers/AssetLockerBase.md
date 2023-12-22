@@ -56,6 +56,40 @@ function feeSettings() external view returns (address)
 
 returns tax system contract address
 
+### isLocked
+
+```solidity
+function isLocked(uint256 id) external view returns (bool)
+```
+
+returns true, if position is locked
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| id | uint256 | id of position |
+
+#### Return Values
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| [0] | bool | bool true if locked |
+
+### isPermanentLock
+
+```solidity
+function isPermanentLock(uint256 id) external view returns (bool)
+```
+
+returns true if asset locked permanently
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| id | uint256 | id of  position |
+
 ### withdraw
 
 ```solidity

@@ -108,17 +108,54 @@ _internal sets position as withdrawed to prevent re-withdrawal_
 | ---- | ---- | ----------- |
 | id | uint256 | id of position |
 
-### lock
+### lockPermanent
 
 ```solidity
-function lock(address erc20Address, uint256 count, uint256 unlockTime_, address withdrawer_) external
+function lockPermanent(address token, uint256 count) external
 ```
 
-### lock
+permanent locks the erc20 tokens. It can not be withdrawed
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| token | address | token address |
+| count | uint256 | token count without decimals |
+
+### lockTimeFor
 
 ```solidity
-function lock(address erc20Address, uint256 count, uint256 unlockTime_) external
+function lockTimeFor(address token, uint256 count, uint256 unlockTime_, address withdrawer_) external
 ```
+
+### lockTime
+
+```solidity
+function lockTime(address token, uint256 count, uint256 unlockTime_) external
+```
+
+### lockSecondsFor
+
+```solidity
+function lockSecondsFor(address token, uint256 count, uint256 seconds_, address withdrawer_) external
+```
+
+### lockSeconds
+
+```solidity
+function lockSeconds(address token, uint256 count, uint256 seconds_) external
+```
+
+locks the token, that can be withdrawed by certait address
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| token | address | token address |
+| count | uint256 | token count without decimals |
+| seconds_ | uint256 | seconds for lock |
 
 ### _withdraw
 

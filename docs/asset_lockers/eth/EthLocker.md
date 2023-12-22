@@ -108,17 +108,37 @@ _internal sets position as withdrawed to prevent re-withdrawal_
 | ---- | ---- | ----------- |
 | id | uint256 | id of position |
 
-### lock
+### lockTimeFor
 
 ```solidity
-function lock(uint256 unlockTime_, address withdrawer_) external payable
+function lockTimeFor(uint256 unlockTime_, address withdrawer_) external payable
 ```
 
-### lock
+### lockTime
 
 ```solidity
-function lock(uint256 unlockTime_) external payable
+function lockTime(uint256 unlockTime_) external payable
 ```
+
+### lockSecondsFor
+
+```solidity
+function lockSecondsFor(uint256 seconds_, address withdrawer_) external payable
+```
+
+### lockSeconds
+
+```solidity
+function lockSeconds(uint256 seconds_) external payable
+```
+
+locks the ethereum, that can be withdrawed
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| seconds_ | uint256 | lock seconds |
 
 ### _withdraw
 

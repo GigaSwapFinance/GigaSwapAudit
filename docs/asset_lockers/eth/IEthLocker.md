@@ -22,10 +22,10 @@ returns the locked position data
 | ---- | ---- | ----------- |
 | [0] | struct EthLockData | EthLockData the locked position data |
 
-### lock
+### lockTimeFor
 
 ```solidity
-function lock(uint256 unlockTime, address withdrawer) external payable
+function lockTimeFor(uint256 unlockTime, address withdrawer) external payable
 ```
 
 locks the ethereum, that can be withdrawed by certait address
@@ -34,13 +34,13 @@ locks the ethereum, that can be withdrawed by certait address
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| unlockTime | uint256 | token unlock time or 0 if permanent lock |
+| unlockTime | uint256 | unlock time |
 | withdrawer | address | the address with withdraw right for position |
 
-### lock
+### lockTime
 
 ```solidity
-function lock(uint256 unlockTime) external payable
+function lockTime(uint256 unlockTime) external payable
 ```
 
 locks the ethereum, that can be withdraw by caller address
@@ -49,5 +49,34 @@ locks the ethereum, that can be withdraw by caller address
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| unlockTime | uint256 | token unlock time or 0 if permanent lock |
+| unlockTime | uint256 | unlock time or 0 if permanent lock |
+
+### lockSecondsFor
+
+```solidity
+function lockSecondsFor(uint256 seconds_, address withdrawer) external payable
+```
+
+locks the ethereum, that can be withdrawed by certait address
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| seconds_ | uint256 | lock seconds |
+| withdrawer | address | the address with withdraw right for position |
+
+### lockSeconds
+
+```solidity
+function lockSeconds(uint256 seconds_) external payable
+```
+
+locks the ethereum, that can be withdrawed
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| seconds_ | uint256 | lock seconds |
 

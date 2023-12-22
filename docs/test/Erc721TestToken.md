@@ -17,6 +17,12 @@ constructor() public
 ### mint
 
 ```solidity
-function mint(uint256 count, address to) external
+function mint() external
+```
+
+### mintToCount
+
+```solidity
+function mintToCount(uint256 count, address to) external
 ```
 

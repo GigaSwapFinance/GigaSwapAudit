@@ -22,34 +22,84 @@ returns the locked position data
 | ---- | ---- | ----------- |
 | [0] | struct Erc721LockData | Erc721LockData the locked position data |
 
-### lock
+### lockPermanent
 
 ```solidity
-function lock(uint256 unlockTime, address withdrawer, uint256[] items) external payable
+function lockPermanent(address token, uint256[] items) external
 ```
 
-locks the ethereum, that can be withdrawed by certait address
+permanent locks the tokens. It can not be withdrawed
 
 #### Parameters
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| unlockTime | uint256 | token unlock time or 0 if permanent lock |
+| token | address | token address |
+| items | uint256[] | items to lock |
+
+### lockTimeFor
+
+```solidity
+function lockTimeFor(address token, uint256[] items, uint256 unlockTime, address withdrawer) external
+```
+
+locks the tokens, that can be withdrawed by certait address
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| token | address | token address |
+| items | uint256[] | items to lock |
+| unlockTime | uint256 | token unlock time |
 | withdrawer | address | the address with withdraw right for position |
-| items | uint256[] | token items to lock |
 
-### lock
+### lockTime
 
 ```solidity
-function lock(uint256 unlockTime, uint256[] items) external payable
+function lockTime(address token, uint256[] items, uint256 unlockTime) external
 ```
 
-locks the items, that can be withdraw by caller address
+locks the tokens, that can be withdraw by caller address
 
 #### Parameters
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| unlockTime | uint256 | token unlock time or 0 if permanent lock |
+| token | address | token address |
+| items | uint256[] | items to lock |
+| unlockTime | uint256 | token unlock time |
+
+### lockSecondsFor
+
+```solidity
+function lockSecondsFor(address token, uint256[] items, uint256 seconds_, address withdrawer) external
+```
+
+locks the token, that can be withdrawed by certait address
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| token | address | token address |
 | items | uint256[] | token items to lock |
+| seconds_ | uint256 | seconds for lock |
+| withdrawer | address | the address with withdraw right for position |
+
+### lockSeconds
+
+```solidity
+function lockSeconds(address token, uint256[] items, uint256 seconds_) external
+```
+
+locks the token, that can be withdrawed by certait address
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| token | address | token address |
+| items | uint256[] | token items to lock |
+| seconds_ | uint256 | seconds for lock |
 

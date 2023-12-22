@@ -4,10 +4,10 @@
 
 ```solidity
 struct Erc721LockData {
+  address token;
   address withdrawer;
   uint256 unlockTime;
   bool withdrawed;
-  address erc721Address;
   uint256[] items;
 }
 ```
