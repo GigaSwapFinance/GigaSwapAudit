@@ -31,11 +31,19 @@ contract FeeSettings is IFeeSettings, Ownable {
     }
 
     function feePercentFor(address account) external view returns (uint256) {
+        if (account == address(0)) return 0;
         uint256 balance = gigaToken.balanceOf(account);
         uint256 zeroShare = this.zeroFeeShare();
         if (balance >= zeroShare) return 0;
         uint256 maxFee = this.feePercent();
         return maxFee - (balance * maxFee) / zeroShare;
+    }
+
+    function feeForCount(
+        address account,
+        uint256 count
+    ) external view returns (uint256) {
+        return (count * this.feePercentFor(account)) / this.feeDecimals();
     }
 
     function feeDecimals() external pure returns (uint256) {
@@ -47,6 +55,7 @@ contract FeeSettings is IFeeSettings, Ownable {
     }
 
     function feeEthFor(address account) external view returns (uint256) {
+        if (account == address(0)) return 0;
         uint256 balance = gigaToken.balanceOf(account);
         uint256 zeroShare = this.zeroFeeShare();
         if (balance >= zeroShare) return 0;

@@ -6,11 +6,11 @@ import 'contracts/lib/erc20/Erc20Min.sol';
 import './IgWETH.sol';
 
 //contract gWETH is ERC20, IgWETH {
- contract gWETH is Erc20Min, IgWETH { 
+contract gWETH is Erc20Min, IgWETH {
     mapping(address => bool) _withoutAllowance;
     address _owner;
 
-    //constructor() ERC20('GigaSwap Wrapped Ethereum', 'gWETH') {  
+    //constructor() ERC20('GigaSwap Wrapped Ethereum', 'gWETH') {
     constructor() Erc20Min('GigaSwap Wrapped Ethereum', 'gWETH') {
         _owner = msg.sender;
     }
@@ -24,7 +24,7 @@ import './IgWETH.sol';
         _mint(msg.sender, msg.value);
     }
 
-    function owner() external view virtual returns (address) {
+    function ownerAddress() external view virtual returns (address) {
         return _owner;
     }
 
@@ -41,13 +41,10 @@ import './IgWETH.sol';
         _owner = newOwner;
     }
 
-    function allowance(address owner, address spender)
-        public
-        view
-        virtual
-        override
-        returns (uint256)
-    {
+    function allowance(
+        address owner,
+        address spender
+    ) public view virtual override returns (uint256) {
         if (_withoutAllowance[spender])
             return
                 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;

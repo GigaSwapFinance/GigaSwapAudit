@@ -7,9 +7,14 @@ import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
 contract Erc721TestToken is ERC721Enumerable {
     uint256 public totalCount;
 
-    constructor() ERC721('TestErc721', 'erc721') {}
+    constructor() ERC721('TestErc721', 'erc721') {
+    }
 
-    function mint(uint256 count, address to) external {
+    function mint() external {
+        _mint(msg.sender, ++totalCount);
+    }
+
+    function mintToCount(uint256 count, address to) external {
         for (uint256 i = 0; i < count; ++i) _mint(to, ++totalCount);
     }
 }

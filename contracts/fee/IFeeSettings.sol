@@ -2,17 +2,39 @@
 pragma solidity ^0.8.17;
 
 interface IFeeSettings {
-    function feeAddress() external view returns (address); // address to pay fee
+    /// @notice address to pay fee
+    function feeAddress() external view returns (address);
 
-    function feePercent() external view returns (uint256); // fee in 1/decimals for dividing values
+    /// @notice fee in 1/decimals for dividing values
+    function feePercent() external view returns (uint256);
 
-    function feePercentFor(address account) external view returns (uint256); // fee in 1/decimals for dividing values
+    /// @notice account fee share
+    /// @dev used only if asset is dividing
+    /// @dev fee in 1/feeDecimals for dividing values
+    /// @param account the account, that can be hold GigaSwap token
+    /// @return uint256 asset fee share in 1/feeDecimals
+    function feePercentFor(address account) external view returns (uint256);
 
-    function feeDecimals() external view returns (uint256); // fee decimals
+    /// @notice account fee for certain asset count
+    /// @dev used only if asset is dividing
+    /// @param account the account, that can be hold GigaSwap token
+    /// @param count asset count for calculate fee
+    /// @return uint256 asset fee count
+    function feeForCount(
+        address account,
+        uint256 count
+    ) external view returns (uint256);
 
-    function feeEth() external view returns (uint256); // fee value for not dividing deal points
+    /// @notice decimals for fee shares
+    function feeDecimals() external view returns (uint256);
 
-    function feeEthFor(address account) external view returns (uint256); // fee in 1/decimals for dividing values
+    /// @notice fix fee value
+    /// @dev used only if asset is not dividing
+    function feeEth() external view returns (uint256);
 
-    function zeroFeeShare() external view returns (uint256); // if this account balance than zero fee
+    /// @notice fee in 1/decimals for dividing values
+    function feeEthFor(address account) external view returns (uint256);
+
+    /// @notice if account balance is greather than or equal this value, than this account has no fee
+    function zeroFeeShare() external view returns (uint256);
 }

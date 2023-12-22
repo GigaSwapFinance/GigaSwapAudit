@@ -68,7 +68,7 @@ contract Erc721CountDealPointsController is
     function _withdraw(
         uint256 pointId,
         address withdrawAddr,
-        uint256 withdrawCount
+        uint256 // withdrawCount
     ) internal virtual override {
         DealPointDataInternal memory point = _data[pointId];
         uint256 pointFee = _fee[pointId];
@@ -95,7 +95,7 @@ contract Erc721CountDealPointsController is
     }
 
     function executeEtherValue(
-        uint256 pointId
+        uint256 // pointId
     ) external pure returns (uint256) {
         return 0;
     }

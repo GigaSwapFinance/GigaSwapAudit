@@ -282,12 +282,12 @@ contract Farming is IFarming, Ownable {
 
     function _claimCountForStack(
         uint256 stackCount,
-        uint256 totalStacksOnInterval,
+        uint256 totalStacksOnInterval_,
         uint256 assetCountOnInterval
     ) internal pure returns (uint256) {
-        if (stackCount > totalStacksOnInterval) return assetCountOnInterval;
-        if (totalStacksOnInterval == 0) return 0;
-        return (stackCount * assetCountOnInterval) / totalStacksOnInterval;
+        if (stackCount > totalStacksOnInterval_) return assetCountOnInterval;
+        if (totalStacksOnInterval_ == 0) return 0;
+        return (stackCount * assetCountOnInterval) / totalStacksOnInterval_;
     }
 
     function erc20ClaimForStack(
@@ -364,8 +364,8 @@ contract Farming is IFarming, Ownable {
         emit OnClaimErc20(msg.sender, _stacks[msg.sender], claimCount);
     }
 
-    function batchClaim(bool claimEth, address[] calldata tokens) external {
-        if (claimEth) _claimEth();
+    function batchClaim(bool claimEth_, address[] calldata tokens) external {
+        if (claimEth_) _claimEth();
         for (uint256 i = 0; i < tokens.length; ++i) _claimErc20(tokens[i]);
     }
 }

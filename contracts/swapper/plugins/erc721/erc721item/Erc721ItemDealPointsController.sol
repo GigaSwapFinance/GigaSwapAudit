@@ -79,7 +79,7 @@ contract Erc721ItemDealPointsController is
     }
 
     function executeEtherValue(
-        uint256 pointId
+        uint256 // pointId
     ) external pure returns (uint256) {
         return 0;
     }

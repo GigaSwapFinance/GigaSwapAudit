@@ -26,6 +26,13 @@ contract FeeSettingsDecorator is IFeeSettings {
         return feeSettings.feePercentFor(account);
     }
 
+    function feeForCount(
+        address account,
+        uint256 count
+    ) external view returns (uint256) {
+        return feeSettings.feeForCount(account, count);
+    }
+
     function feeDecimals() external view returns (uint256) {
         return feeSettings.feeDecimals();
     }

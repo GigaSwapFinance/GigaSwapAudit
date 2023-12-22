@@ -11,15 +11,15 @@ contract Vote is IVote, HasFactories {
     uint256 _newVoteEtherPrice = 1e17;
     uint256 _newVoteERC20Price = 300000000 * 1e9;
     uint256 _voteTimer = 48 hours;
-    IERC20 _erc20;
+    IERC20 immutable _erc20;
 
     uint256 _votesCount;
     mapping(uint256 => VoteData) _votes;
     mapping(uint256 => mapping(address => uint8)) _userVotes; // 1- for 2 - against
     mapping(uint256 => mapping(address => bool)) _userClaims;
 
-    constructor(address erc20Address) {
-        _erc20 = IERC20(erc20Address);
+    constructor(address erc20Address_) {
+        _erc20 = IERC20(erc20Address_);
     }
 
     function erc20Address() external view returns (address) {
@@ -89,7 +89,7 @@ contract Vote is IVote, HasFactories {
 
     function userVote(
         uint256 voteId,
-        address account
+        address // account
     ) external view returns (uint256) {
         return _userVotes[voteId][msg.sender];
     }
