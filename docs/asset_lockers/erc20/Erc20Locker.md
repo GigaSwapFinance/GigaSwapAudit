@@ -1,0 +1,136 @@
+# Solidity API
+
+## Erc20Locker
+
+### _positions
+
+```solidity
+mapping(uint256 => struct Erc20LockData) _positions
+```
+
+### constructor
+
+```solidity
+constructor(address feeSettingsAddress) public
+```
+
+### position
+
+```solidity
+function position(uint256 id) external view returns (struct Erc20LockData)
+```
+
+returns the locked position data
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| id | uint256 | id of position |
+
+#### Return Values
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| [0] | struct Erc20LockData | Erc20LockData the locked position data |
+
+### withdrawer
+
+```solidity
+function withdrawer(uint256 id) external view returns (address)
+```
+
+the address with withdraw right for position
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| id | uint256 | id of position |
+
+#### Return Values
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| [0] | address | address the address with withdraw right for position |
+
+### unlockTime
+
+```solidity
+function unlockTime(uint256 id) external view returns (uint256)
+```
+
+time when the position will be unlocked
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| id | uint256 | id of position |
+
+#### Return Values
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| [0] | uint256 | uint256 linux epoh time, when unlock or 0 if lock permanently |
+
+### withdrawed
+
+```solidity
+function withdrawed(uint256 id) external view returns (bool)
+```
+
+if true than position is already withdrawed
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| id | uint256 | id of position |
+
+#### Return Values
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| [0] | bool | bool true if position is withdrawed |
+
+### _setWithdrawed
+
+```solidity
+function _setWithdrawed(uint256 id) internal
+```
+
+_internal sets position as withdrawed to prevent re-withdrawal_
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| id | uint256 | id of position |
+
+### lock
+
+```solidity
+function lock(address erc20Address, uint256 count, uint256 unlockTime_, address withdrawer_) external
+```
+
+### lock
+
+```solidity
+function lock(address erc20Address, uint256 count, uint256 unlockTime_) external
+```
+
+### _withdraw
+
+```solidity
+function _withdraw(uint256 id) internal
+```
+
+_internal withdraw algorithm, asset speciffic_
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| id | uint256 | id of position |
+
