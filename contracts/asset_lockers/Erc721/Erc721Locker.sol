@@ -5,7 +5,6 @@ import '../IAssetLocker.sol';
 import '../AssetLockerBase.sol';
 import './IErc721Locker.sol';
 import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
-import '@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol';
 
 contract Erc721Locker is AssetLockerBase, IErc721Locker {
     mapping(uint256 => Erc721LockData) _positions;
@@ -45,7 +44,7 @@ contract Erc721Locker is AssetLockerBase, IErc721Locker {
     function lockPermanent(
         address token,
         uint256[] calldata items
-    ) external {
+    ) external payable {
         _lock(token, 0, address(0), items);
     }
 
@@ -54,7 +53,7 @@ contract Erc721Locker is AssetLockerBase, IErc721Locker {
         uint256[] calldata items,
         uint256 unlockTime_,
         address withdrawer_
-    ) external {
+    ) external payable {
         _lock(token, unlockTime_, withdrawer_, items);
     }
 
@@ -62,7 +61,7 @@ contract Erc721Locker is AssetLockerBase, IErc721Locker {
         address token,
         uint256[] calldata items,
         uint256 unlockTime_
-    ) external {
+    ) external payable {
         _lock(token, unlockTime_, msg.sender, items);
     }
 
@@ -71,7 +70,7 @@ contract Erc721Locker is AssetLockerBase, IErc721Locker {
         uint256[] calldata items,
         uint256 seconds_,
         address withdrawer_
-    ) external {
+    ) external payable {
         _lock(token, block.timestamp + seconds_, withdrawer_, items);
     }
 
@@ -79,7 +78,7 @@ contract Erc721Locker is AssetLockerBase, IErc721Locker {
         address token,
         uint256[] calldata items,
         uint256 seconds_
-    ) external {
+    ) external payable {
         _lock(token, block.timestamp + seconds_, msg.sender, items);
     }
 
@@ -112,11 +111,7 @@ contract Erc721Locker is AssetLockerBase, IErc721Locker {
         // transfer the tokens
         IERC721 token = IERC721(tokenAddress);
         for (uint256 i = 0; i < items.length; ++i) {
-            token.transferFrom(
-                msg.sender,
-                address(this),
-                items[i]
-            );
+            token.transferFrom(msg.sender, address(this), items[i]);
         }
 
         data.items = items;

@@ -437,6 +437,14 @@ contract Erc20Sale is IErc20Sale, IErc20SaleCounterOffer {
         return _spendToBuy(_positions[positionId], count);
     }
 
+    function buyCount(
+        uint256 positionId,
+        uint256 spend
+    ) external view returns (uint256) {
+        PositionData memory pos = _positions[positionId];
+        return (spend * pos.priceDenom) / pos.priceNom;
+    }
+
     function _spendToBuy(
         PositionData memory pos,
         uint256 count

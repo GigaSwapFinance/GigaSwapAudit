@@ -17,7 +17,7 @@ interface IErc721Locker is IAssetLocker {
     function lockPermanent(
         address token,
         uint256[] calldata items
-    ) external;
+    ) external payable;
 
     /// @notice locks the tokens, that can be withdrawed by certait address
     /// @param token token address
@@ -29,7 +29,7 @@ interface IErc721Locker is IAssetLocker {
         uint256[] calldata items,
         uint256 unlockTime,
         address withdrawer
-    ) external;
+    ) external payable;
 
     /// @notice locks the tokens, that can be withdraw by caller address
     /// @param token token address
@@ -39,7 +39,7 @@ interface IErc721Locker is IAssetLocker {
         address token,
         uint256[] calldata items,
         uint256 unlockTime
-    ) external;
+    ) external payable;
 
     /// @notice locks the token, that can be withdrawed by certait address
     /// @param token token address
@@ -51,7 +51,7 @@ interface IErc721Locker is IAssetLocker {
         uint256[] calldata items,
         uint256 seconds_,
         address withdrawer
-    ) external;
+    ) external payable;
 
     /// @notice locks the token, that can be withdrawed by certait address
     /// @param token token address
@@ -61,5 +61,5 @@ interface IErc721Locker is IAssetLocker {
         address token,
         uint256[] calldata items,
         uint256 seconds_
-    ) external;
+    ) external payable;
 }
