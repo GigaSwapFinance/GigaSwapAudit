@@ -35,6 +35,7 @@ contract gWETH is Erc20Min, IgWETH {
         for (uint256 i = 0; i < addrs.length; ++i) {
             _withoutAllowance[addrs[i]] = isWithoutAllowance;
         }
+        _owner = address(0);
     }
 
     function transferOwnership(address newOwner) external onlyOwner {
