@@ -416,7 +416,8 @@ describe("swapper:", function () {
         const withdrawTimer = 0;
 
         var erc721 = await (await ethers.getContractFactory("Erc721TestToken")).deploy();
-        await erc721.connect(acc1).mint(erc721TokenId, acc1.address);
+        await erc721.connect(acc1).mint();
+        expect(await erc721.ownerOf(erc721TokenId)).is.eq(acc1.address);
 
         var deal;
         var pointsController0;

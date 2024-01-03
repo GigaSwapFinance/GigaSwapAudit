@@ -9,11 +9,13 @@ describe("Weth:", function () {
     let acc2;
     let addrs;
     let weth;
+    let giga;
 
     // перед каждым тестом деплоим контракт
     beforeEach(async () => {
         [owner, acc1, acc2, ...addrs] = await ethers.getSigners();
-        feeSettings = await (await ethers.getContractFactory("FeeSettings")).deploy();
+        giga = await (await ethers.getContractFactory("Erc20TestToken")).deploy(0);
+        feeSettings = await (await ethers.getContractFactory("FeeSettings")).deploy(giga.address);
         weth = await (await ethers.getContractFactory("gWETH")).deploy();
     });
 

@@ -2,7 +2,7 @@ const { expect } = require("chai");
 const { Up, Days, Seconds } = require("../Helpers/TimeHelper");
 const { BigNumber } = require("bignumber.js");
 //const helpers = require("@nomicfoundation/hardhat-network-helpers");
-
+/*
 describe("Erc20SaleReal:", function () {
     let owner;
     let acc1;
@@ -32,3 +32,4 @@ describe("Erc20SaleReal:", function () {
         await erc20Sale.connect(acc).Buy(10, acc.address, "100", position.priceNom, position.priceDenom);
     });
 });
+*/

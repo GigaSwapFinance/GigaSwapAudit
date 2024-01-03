@@ -3,7 +3,7 @@ const { BigNumber } = require("ethers");
 const { Up, Days, Seconds } = require("./Helpers/TimeHelper");
 const { ethers, waffle } = require("hardhat");
 
-describe("stacking:", function () {
+describe("farming:", function () {
     let dealsController;
     let erc20Token;
     let owner;
