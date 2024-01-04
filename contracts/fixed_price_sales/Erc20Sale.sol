@@ -17,8 +17,24 @@ struct BuyFunctionData {
     uint256 transferred;
 }
 
+/// @title settings for lock after token buy
+struct BuyLockSettings {
+    /// @notice locked token
+    /// @dev see precision Erc20Sale.LOCK_PRECISION
+    uint256 receivePercent;
+    /// @notice lock time if unlockPercentByTime==0 or interval for unlock if unlockPercentByTime>0. 
+    /// @notice If this parameter is 0 than has no lock.
+    uint256 lockTime;
+    /// @notice percent for unlock every lockTime. Or 0 if unlock all after lockTime
+    /// @dev see precision Erc20Sale.LOCK_PRECISION
+    uint256 unlockPercentByTime;
+}
+
 contract Erc20Sale is IErc20Sale, IErc20SaleCounterOffer {
     using SafeERC20 for IERC20;
+
+    /// @notice precision for lock after buy (0.01%)
+    uint256 constant public LOCK_PRECISION = 10000;
 
     IFeeSettings public immutable feeSettings;
     IPacketErc20 public immutable packet;

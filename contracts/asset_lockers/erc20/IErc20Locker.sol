@@ -59,4 +59,30 @@ interface IErc20Locker is IAssetLocker {
         uint256 count,
         uint256 seconds_
     ) external;
+
+    /// @notice locks the step-by-step unlocking position
+    /// @param tokenAddress token address
+    /// @param count token count without decimals for lock
+    /// @param withdrawer the address with withdraw right for position
+    /// @param interval the interval for unlock
+    /// @param stepByStepUnlockCount how many tokens are unlocked each interval
+    function lockStepByStepUnlocking(
+        address tokenAddress,
+        uint256 count,
+        address withdrawer,
+        uint256 interval,
+        uint256 stepByStepUnlockCount
+    ) external;
+
+    /// @notice remaining tokens for withdraw
+    function remainingTokensToWithdraw(uint256 id) external view returns (uint256);
+
+    /// @notice unlocked tokens count. All unlocked tokens.(withdrawen and not)
+    function unlockedCount(uint256 id) external view returns (uint256);
+
+    /// @notice unlocked tokens count. Available for withdraw
+    function unlockedCountWithdrawAvailable(uint256 id) external view returns (uint256);
+
+    /// @notice the unlock all time
+    function unlockAllTime(uint256 id) external view returns (uint256);
 }

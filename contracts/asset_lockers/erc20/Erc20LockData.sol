@@ -7,10 +7,14 @@ struct Erc20LockData {
     address token;
     /// @notice the address with withdraw right for position
     address withdrawer;
-    /// @notice position unlock pime
-    uint256 unlockTime;
-    /// @notice if true, than position is withdrawed
-    bool withdrawed;
-    /// @notice count of token, without decimals, that can be withdrawed
+    /// @notice position unlock time or unlock time interval if step-by-step
+    uint256 creationTime;
+    /// @notice position unlock time interval
+    uint256 timeInterval;
+    /// @notice how many tokens are withdrawed already
+    uint256 withdrawedCount;
+    /// @notice whole lock count
     uint256 count;
+    /// @notice if >0 than unlock is step-by-step and this equal for one unlock count
+    uint256 stepByStepUnlockCount;
 }

@@ -6,9 +6,11 @@
 struct Erc20LockData {
   address token;
   address withdrawer;
-  uint256 unlockTime;
-  bool withdrawed;
+  uint256 creationTime;
+  uint256 timeInterval;
+  uint256 withdrawedCount;
   uint256 count;
+  uint256 stepByStepUnlockCount;
 }
 ```
 

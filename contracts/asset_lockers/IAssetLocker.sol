@@ -21,7 +21,7 @@ interface IAssetLocker {
     /// @return address the address with withdraw right for position
     function withdrawer(uint256 id) external view returns (address);
 
-    /// @notice time when the position will be unlocked
+    /// @notice time when the position will be unlocked (only full unlock)
     /// @param id id of position
     /// @return uint256 linux epoh time, when unlock or 0 if lock permanently
     function unlockTime(uint256 id) external view returns (uint256);

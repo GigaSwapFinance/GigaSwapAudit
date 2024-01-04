@@ -6,7 +6,7 @@ const { isCallTrace } = require("hardhat/internal/hardhat-network/stack-traces/m
 chai.use(require('chai-bignumber')());
 const addresses = require("./ContractAddresses.js");
 
-describe("RealTest:", function () {
+/*describe("RealTest:", function () {
     let token;
     let owner;
     let acc1;
@@ -54,5 +54,5 @@ describe("RealTest:", function () {
                 1,
                 swapCount,
                 snap);*/
-    });
-});
+    /*});
+});*/

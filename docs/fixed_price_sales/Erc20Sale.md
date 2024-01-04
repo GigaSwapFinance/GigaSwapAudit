@@ -12,7 +12,25 @@ struct BuyFunctionData {
 }
 ```
 
+## BuyLockSettings
+
+```solidity
+struct BuyLockSettings {
+  uint256 receivePercent;
+  uint256 lockTime;
+  uint256 unlockPercentByTime;
+}
+```
+
 ## Erc20Sale
+
+### LOCK_PRECISION
+
+```solidity
+uint256 LOCK_PRECISION
+```
+
+precision for lock after buy (0.01%)
 
 ### feeSettings
 
@@ -180,6 +198,12 @@ function buy(uint256 positionId, address to, uint256 count, uint256 priceNom, ui
 
 ```solidity
 function spendToBuy(uint256 positionId, uint256 count) external view returns (uint256)
+```
+
+### buyCount
+
+```solidity
+function buyCount(uint256 positionId, uint256 spend) external view returns (uint256)
 ```
 
 ### getPosition

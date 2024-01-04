@@ -3,9 +3,10 @@ pragma solidity ^0.8.17;
 
 import './IAssetLocker.sol';
 import 'contracts/fee/IFeeSettings.sol';
+import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 
 /// @title used to block asset for any time
-abstract contract AssetLockerBase is IAssetLocker {
+abstract contract AssetLockerBase is IAssetLocker, ReentrancyGuard {
     /// @notice total created positions count
     uint256 _positionsCount;
     /// @notice tax system contract
@@ -37,6 +38,10 @@ abstract contract AssetLockerBase is IAssetLocker {
     /// @param id id of position
     /// @return bool true if locked
     function isLocked(uint256 id) external view returns (bool) {
+        return _isLocked(id);
+    }
+
+    function _isLocked(uint256 id) internal view virtual returns (bool) {
         uint256 time = this.unlockTime(id);
         return time == 0 || time > block.timestamp;
     }
@@ -49,14 +54,13 @@ abstract contract AssetLockerBase is IAssetLocker {
 
     /// @notice withdraws the position
     /// @param id id of position
-    function withdraw(uint256 id) external {
-        uint256 time = this.unlockTime(id);
+    function withdraw(uint256 id) external nonReentrant {
         require(!this.withdrawed(id), 'already withdrawed');
         require(!this.isPermanentLock(id), 'locked permanently');
-        require(time <= block.timestamp, 'still locked');
+        require(!this.isLocked(id), 'still locked');
         require(this.withdrawer(id) == msg.sender, 'only for withdrawer');
-        _setWithdrawed(id);
         _withdraw(id);
+        _setWithdrawed(id);
         emit OnWithdraw(id);
     }
 

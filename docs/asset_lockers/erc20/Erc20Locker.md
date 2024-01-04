@@ -54,13 +54,19 @@ the address with withdraw right for position
 | ---- | ---- | ----------- |
 | [0] | address | address the address with withdraw right for position |
 
+### _isLocked
+
+```solidity
+function _isLocked(uint256 id) internal view returns (bool)
+```
+
 ### unlockTime
 
 ```solidity
 function unlockTime(uint256 id) external view returns (uint256)
 ```
 
-time when the position will be unlocked
+time when the position will be unlocked (only full unlock)
 
 #### Parameters
 
@@ -73,6 +79,28 @@ time when the position will be unlocked
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | [0] | uint256 | uint256 linux epoh time, when unlock or 0 if lock permanently |
+
+### unlockAllTime
+
+```solidity
+function unlockAllTime(uint256 id) external view returns (uint256)
+```
+
+the unlock all time
+
+### remainingTokensToWithdraw
+
+```solidity
+function remainingTokensToWithdraw(uint256 id) external view returns (uint256)
+```
+
+remaining tokens for withdraw
+
+### _remainingTokensToWithdraw
+
+```solidity
+function _remainingTokensToWithdraw(uint256 id) internal view returns (uint256)
+```
 
 ### withdrawed
 
@@ -157,6 +185,18 @@ locks the token, that can be withdrawed by certait address
 | count | uint256 | token count without decimals |
 | seconds_ | uint256 | seconds for lock |
 
+### lockStepByStepUnlocking
+
+```solidity
+function lockStepByStepUnlocking(address tokenAddress, uint256 count, address withdrawer_, uint256 interval, uint256 stepByStepUnlockCount) external
+```
+
+### _lock
+
+```solidity
+function _lock(address tokenAddress, uint256 count, address withdrawer_, uint256 interval, uint256 stepByStepUnlockCount) internal
+```
+
 ### _withdraw
 
 ```solidity
@@ -170,4 +210,32 @@ _internal withdraw algorithm, asset speciffic_
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | id | uint256 | id of position |
+
+### unlockedCount
+
+```solidity
+function unlockedCount(uint256 id) external view returns (uint256)
+```
+
+unlocked tokens count. All unlocked tokens.(withdrawen and not)
+
+### _unlockedCount
+
+```solidity
+function _unlockedCount(uint256 id) internal view returns (uint256)
+```
+
+### unlockedCountWithdrawAvailable
+
+```solidity
+function unlockedCountWithdrawAvailable(uint256 id) external view returns (uint256)
+```
+
+unlocked tokens count. Available for withdraw
+
+### _unlockedCountWithdrawAvailable
+
+```solidity
+function _unlockedCountWithdrawAvailable(uint256 id) internal view returns (uint256)
+```
 

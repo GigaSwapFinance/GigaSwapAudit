@@ -20,6 +20,12 @@ constructor() public
 function mint() external
 ```
 
+### mintTo
+
+```solidity
+function mintTo(address to) external
+```
+
 ### mintToCount
 
 ```solidity

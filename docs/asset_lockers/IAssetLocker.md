@@ -72,7 +72,7 @@ the address with withdraw right for position
 function unlockTime(uint256 id) external view returns (uint256)
 ```
 
-time when the position will be unlocked
+time when the position will be unlocked (only full unlock)
 
 #### Parameters
 

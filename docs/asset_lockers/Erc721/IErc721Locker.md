@@ -25,7 +25,7 @@ returns the locked position data
 ### lockPermanent
 
 ```solidity
-function lockPermanent(address token, uint256[] items) external
+function lockPermanent(address token, uint256[] items) external payable
 ```
 
 permanent locks the tokens. It can not be withdrawed
@@ -40,7 +40,7 @@ permanent locks the tokens. It can not be withdrawed
 ### lockTimeFor
 
 ```solidity
-function lockTimeFor(address token, uint256[] items, uint256 unlockTime, address withdrawer) external
+function lockTimeFor(address token, uint256[] items, uint256 unlockTime, address withdrawer) external payable
 ```
 
 locks the tokens, that can be withdrawed by certait address
@@ -57,7 +57,7 @@ locks the tokens, that can be withdrawed by certait address
 ### lockTime
 
 ```solidity
-function lockTime(address token, uint256[] items, uint256 unlockTime) external
+function lockTime(address token, uint256[] items, uint256 unlockTime) external payable
 ```
 
 locks the tokens, that can be withdraw by caller address
@@ -73,7 +73,7 @@ locks the tokens, that can be withdraw by caller address
 ### lockSecondsFor
 
 ```solidity
-function lockSecondsFor(address token, uint256[] items, uint256 seconds_, address withdrawer) external
+function lockSecondsFor(address token, uint256[] items, uint256 seconds_, address withdrawer) external payable
 ```
 
 locks the token, that can be withdrawed by certait address
@@ -90,7 +90,7 @@ locks the token, that can be withdrawed by certait address
 ### lockSeconds
 
 ```solidity
-function lockSeconds(address token, uint256[] items, uint256 seconds_) external
+function lockSeconds(address token, uint256[] items, uint256 seconds_) external payable
 ```
 
 locks the token, that can be withdrawed by certait address

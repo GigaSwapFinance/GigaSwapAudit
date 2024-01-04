@@ -76,6 +76,12 @@ returns true, if position is locked
 | ---- | ---- | ----------- |
 | [0] | bool | bool true if locked |
 
+### _isLocked
+
+```solidity
+function _isLocked(uint256 id) internal view virtual returns (bool)
+```
+
 ### isPermanentLock
 
 ```solidity
