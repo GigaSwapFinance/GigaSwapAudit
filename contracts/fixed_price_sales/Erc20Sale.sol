@@ -5,9 +5,8 @@ import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import 'contracts/fee/IFeeSettings.sol';
 import './IErc20Sale.sol';
-import './IErc20SaleCounterOffer.sol';
 import '../lib/ownable/Ownable.sol';
-import 'contracts/packet/IPacketErc20.sol';
+import 'contracts/asset_lockers/erc20/IErc20Locker.sol';
 
 struct BuyFunctionData {
     uint256 spend;
@@ -17,39 +16,79 @@ struct BuyFunctionData {
     uint256 transferred;
 }
 
-/// @title settings for lock after token buy
-struct BuyLockSettings {
-    /// @notice locked token
-    /// @dev see precision Erc20Sale.LOCK_PRECISION
-    uint256 receivePercent;
-    /// @notice lock time if unlockPercentByTime==0 or interval for unlock if unlockPercentByTime>0. 
-    /// @notice If this parameter is 0 than has no lock.
-    uint256 lockTime;
-    /// @notice percent for unlock every lockTime. Or 0 if unlock all after lockTime
-    /// @dev see precision Erc20Sale.LOCK_PRECISION
-    uint256 unlockPercentByTime;
-}
-
-contract Erc20Sale is IErc20Sale, IErc20SaleCounterOffer {
+contract Erc20Sale is IErc20Sale {
     using SafeERC20 for IERC20;
 
-    /// @notice precision for lock after buy (0.01%)
-    uint256 constant public LOCK_PRECISION = 10000;
-
     IFeeSettings public immutable feeSettings;
-    IPacketErc20 public immutable packet;
+    IErc20Locker public immutable locker;
     mapping(uint256 => PositionData) _positions;
     mapping(uint256 => mapping(address => bool)) _whiteLists;
     mapping(uint256 => uint256) _limits;
     mapping(uint256 => mapping(address => uint256)) _usedLimits;
     mapping(uint256 => OfferData) _offers;
-    mapping(uint256 => uint256) _packetClaimTimes;
+    mapping(uint256 => BuyLockSettings) _lockSettings;
     uint256 public totalOffers;
     uint256 _totalPositions;
 
-    constructor(address feeSettings_, address packet_) {
+    constructor(address feeSettings_, address locker_) {
         feeSettings = IFeeSettings(feeSettings_);
-        packet = IPacketErc20(packet_);
+        locker = IErc20Locker(locker_);
+    }
+
+    function createPosition(
+        address asset1,
+        address asset2,
+        uint256 priceNom,
+        uint256 priceDenom,
+        uint256 count,
+        uint8 flags,
+        uint256 buyLimit,
+        address[] calldata whiteList,
+        BuyLockSettings calldata lockSettings
+    ) external {
+        if (count > 0) {
+            uint256 lastCount = IERC20(asset1).balanceOf(address(this));
+            IERC20(asset1).safeTransferFrom(msg.sender, address(this), count);
+            count = IERC20(asset1).balanceOf(address(this)) - lastCount;
+        }
+
+        _positions[++_totalPositions] = PositionData(
+            msg.sender,
+            asset1,
+            asset2,
+            priceNom,
+            priceDenom,
+            count,
+            0,
+            flags
+        );
+
+        if (flags & LOCK_FLAG > 0) {
+            require(
+                lockSettings.receivePercent < LOCK_PRECISION,
+                'receive percent in lock must be less than 100% for lock'
+            );
+            require(
+                lockSettings.receivePercent +
+                    lockSettings.unlockPercentByTime <=
+                    LOCK_PRECISION,
+                'lock settings is not correct: receivePercent+unlockPercentByTime > LOCK_PRECISION'
+            );
+            _lockSettings[_totalPositions] = lockSettings;
+        }
+
+        if (buyLimit > 0) _limits[_totalPositions] = buyLimit;
+        for (uint256 i = 0; i < whiteList.length; ++i)
+            _whiteLists[_totalPositions][whiteList[i]] = true;
+
+        emit OnCreate(
+            _totalPositions,
+            msg.sender,
+            asset1,
+            asset2,
+            priceNom,
+            priceDenom
+        );
     }
 
     function createOffer(
@@ -110,17 +149,17 @@ contract Erc20Sale is IErc20Sale, IErc20SaleCounterOffer {
         require(position.owner == msg.sender, 'only owner can apply offer');
 
         // buyCount
-        uint256 buyCount = offer.asset1Count;
+        uint256 buyCount_ = offer.asset1Count;
         require(
-            buyCount <= position.count1,
+            buyCount_ <= position.count1,
             'not enough owner asset to apply offer'
         );
-        require(buyCount > 0, 'nothing to buy');
+        require(buyCount_ > 0, 'nothing to buy');
 
         // calculate the fee of buy count
-        uint256 buyFee = (buyCount * feeSettings.feePercentFor(offer.owner)) /
+        uint256 buyFee = (buyCount_ * feeSettings.feePercentFor(offer.owner)) /
             feeSettings.feeDecimals();
-        uint256 buyToTransfer = buyCount - buyFee;
+        uint256 buyToTransfer = buyCount_ - buyFee;
 
         // transfer the buy asset
         if (buyFee > 0)
@@ -131,7 +170,7 @@ contract Erc20Sale is IErc20Sale, IErc20SaleCounterOffer {
         IERC20(position.asset1).safeTransfer(offer.owner, buyToTransfer);
 
         // transfer asset2 to position
-        position.count1 -= buyCount;
+        position.count1 -= buyCount_;
         position.count2 += offer.asset2Count;
 
         // event
@@ -142,52 +181,6 @@ contract Erc20Sale is IErc20Sale, IErc20SaleCounterOffer {
         uint256 offerId
     ) external view returns (OfferData memory) {
         return _offers[offerId];
-    }
-
-    function createPosition(
-        address asset1,
-        address asset2,
-        uint256 priceNom,
-        uint256 priceDenom,
-        uint256 count,
-        uint8 flags,
-        uint256 buyLimit,
-        address[] calldata whiteList,
-        uint256 packetClaimTime
-    ) external {
-        if (count > 0) {
-            uint256 lastCount = IERC20(asset1).balanceOf(address(this));
-            IERC20(asset1).safeTransferFrom(msg.sender, address(this), count);
-            count = IERC20(asset1).balanceOf(address(this)) - lastCount;
-        }
-
-        _positions[++_totalPositions] = PositionData(
-            msg.sender,
-            asset1,
-            asset2,
-            priceNom,
-            priceDenom,
-            count,
-            0,
-            flags
-        );
-
-        if (flags & PACKET_FLAG > 0) {
-            _packetClaimTimes[_totalPositions] = packetClaimTime;
-        }
-
-        if (buyLimit > 0) _limits[_totalPositions] = buyLimit;
-        for (uint256 i = 0; i < whiteList.length; ++i)
-            _whiteLists[_totalPositions][whiteList[i]] = true;
-
-        emit OnCreate(
-            _totalPositions,
-            msg.sender,
-            asset1,
-            asset2,
-            priceNom,
-            priceDenom
-        );
     }
 
     function addBalance(uint256 positionId, uint256 count) external {
@@ -411,13 +404,23 @@ contract Erc20Sale is IErc20Sale, IErc20SaleCounterOffer {
                 data.buyFee
             );
         // transfer to buyer
-        if (pos.flags & PACKET_FLAG > 0) {
-            IERC20(pos.asset1).approve(address(packet), type(uint256).max);
-            packet.addStack(
-                to,
+        if (pos.flags & LOCK_FLAG > 0) {
+            IERC20(pos.asset1).approve(address(locker), type(uint256).max);
+            BuyLockSettings memory lockSettings = _lockSettings[positionId];
+
+            if (lockSettings.receivePercent > 0) {
+                uint256 sendCount = (data.buyToTransfer *
+                    lockSettings.receivePercent) / LOCK_PRECISION;
+                IERC20(pos.asset1).safeTransfer(to, sendCount);
+                data.buyToTransfer -= sendCount;
+            }
+            locker.lockStepByStepUnlocking(
                 pos.asset1,
                 data.buyToTransfer,
-                _packetClaimTimes[positionId]
+                to,
+                lockSettings.lockTime,
+                (data.buyToTransfer * lockSettings.unlockPercentByTime) /
+                    LOCK_PRECISION
             );
         } else {
             IERC20(pos.asset1).safeTransfer(to, data.buyToTransfer);
@@ -474,9 +477,9 @@ contract Erc20Sale is IErc20Sale, IErc20SaleCounterOffer {
         return _positions[positionId];
     }
 
-    function getPositionPacketClaimTime(
+    function getPositionLockSettings(
         uint256 positionId
-    ) external view returns (uint256) {
-        return _packetClaimTimes[positionId];
+    ) external view returns (BuyLockSettings memory) {
+        return _lockSettings[positionId];
     }
 }

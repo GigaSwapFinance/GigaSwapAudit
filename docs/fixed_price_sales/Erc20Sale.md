@@ -12,25 +12,7 @@ struct BuyFunctionData {
 }
 ```
 
-## BuyLockSettings
-
-```solidity
-struct BuyLockSettings {
-  uint256 receivePercent;
-  uint256 lockTime;
-  uint256 unlockPercentByTime;
-}
-```
-
 ## Erc20Sale
-
-### LOCK_PRECISION
-
-```solidity
-uint256 LOCK_PRECISION
-```
-
-precision for lock after buy (0.01%)
 
 ### feeSettings
 
@@ -38,10 +20,10 @@ precision for lock after buy (0.01%)
 contract IFeeSettings feeSettings
 ```
 
-### packet
+### locker
 
 ```solidity
-contract IPacketErc20 packet
+contract IErc20Locker locker
 ```
 
 ### _positions
@@ -74,10 +56,10 @@ mapping(uint256 => mapping(address => uint256)) _usedLimits
 mapping(uint256 => struct OfferData) _offers
 ```
 
-### _packetClaimTimes
+### _lockSettings
 
 ```solidity
-mapping(uint256 => uint256) _packetClaimTimes
+mapping(uint256 => struct BuyLockSettings) _lockSettings
 ```
 
 ### totalOffers
@@ -95,7 +77,13 @@ uint256 _totalPositions
 ### constructor
 
 ```solidity
-constructor(address feeSettings_, address packet_) public
+constructor(address feeSettings_, address locker_) public
+```
+
+### createPosition
+
+```solidity
+function createPosition(address asset1, address asset2, uint256 priceNom, uint256 priceDenom, uint256 count, uint8 flags, uint256 buyLimit, address[] whiteList, struct BuyLockSettings lockSettings) external
 ```
 
 ### createOffer
@@ -120,12 +108,6 @@ function applyOffer(uint256 offerId) external
 
 ```solidity
 function getOffer(uint256 offerId) external view returns (struct OfferData)
-```
-
-### createPosition
-
-```solidity
-function createPosition(address asset1, address asset2, uint256 priceNom, uint256 priceDenom, uint256 count, uint8 flags, uint256 buyLimit, address[] whiteList, uint256 packetClaimTime) external
 ```
 
 ### addBalance
@@ -212,9 +194,9 @@ function buyCount(uint256 positionId, uint256 spend) external view returns (uint
 function getPosition(uint256 positionId) external view returns (struct PositionData)
 ```
 
-### getPositionPacketClaimTime
+### getPositionLockSettings
 
 ```solidity
-function getPositionPacketClaimTime(uint256 positionId) external view returns (uint256)
+function getPositionLockSettings(uint256 positionId) external view returns (struct BuyLockSettings)
 ```
 

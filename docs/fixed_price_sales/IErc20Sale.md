@@ -12,10 +12,10 @@ uint8 WHITELIST_FLAG
 uint8 BUYLIMIT_FLAG
 ```
 
-## PACKET_FLAG
+## LOCK_FLAG
 
 ```solidity
-uint8 PACKET_FLAG
+uint8 LOCK_FLAG
 ```
 
 ## PositionData
@@ -31,6 +31,22 @@ struct PositionData {
   uint256 count2;
   uint8 flags;
 }
+```
+
+## BuyLockSettings
+
+```solidity
+struct BuyLockSettings {
+  uint256 receivePercent;
+  uint256 lockTime;
+  uint256 unlockPercentByTime;
+}
+```
+
+## LOCK_PRECISION
+
+```solidity
+uint256 LOCK_PRECISION
 ```
 
 ## IErc20Sale
@@ -83,15 +99,99 @@ event OnBuyLimitEnable(uint256 positionId, bool enable)
 event OnBuyLimit(uint256 positionId, uint256 limit)
 ```
 
+### createPosition
+
+```solidity
+function createPosition(address asset1, address asset2, uint256 priceNom, uint256 priceDenom, uint256 count, uint8 flags, uint256 buyLimit, address[] whiteList, struct BuyLockSettings lockSettings) external
+```
+
+### addBalance
+
+```solidity
+function addBalance(uint256 positionId, uint256 count) external
+```
+
+### withdraw
+
+```solidity
+function withdraw(uint256 positionId, uint256 assetCode, address to, uint256 count) external
+```
+
+### withdrawAllTo
+
+```solidity
+function withdrawAllTo(uint256 positionId, uint256 assetCode, address to) external
+```
+
+### withdrawAll
+
+```solidity
+function withdrawAll(uint256 positionId, uint256 assetCode) external
+```
+
+### setPrice
+
+```solidity
+function setPrice(uint256 positionId, uint256 priceNom, uint256 priceDenom) external
+```
+
+### setWhiteList
+
+```solidity
+function setWhiteList(uint256 positionId, bool whiteListed, address[] accounts) external
+```
+
+### isWhiteListed
+
+```solidity
+function isWhiteListed(uint256 positionId, address account) external view returns (bool)
+```
+
+### enableWhiteList
+
+```solidity
+function enableWhiteList(uint256 positionId, bool enabled) external
+```
+
+### enableBuyLimit
+
+```solidity
+function enableBuyLimit(uint256 positionId, bool enabled) external
+```
+
+### setBuyLimit
+
+```solidity
+function setBuyLimit(uint256 positionId, uint256 limit) external
+```
+
+### buy
+
+```solidity
+function buy(uint256 positionId, address to, uint256 count, uint256 priceNom, uint256 priceDenom, address antibot) external
+```
+
+### spendToBuy
+
+```solidity
+function spendToBuy(uint256 positionId, uint256 count) external view returns (uint256)
+```
+
+### buyCount
+
+```solidity
+function buyCount(uint256 positionId, uint256 spend) external view returns (uint256)
+```
+
 ### getPosition
 
 ```solidity
 function getPosition(uint256 positionId) external view returns (struct PositionData)
 ```
 
-### getPositionPacketClaimTime
+### getPositionLockSettings
 
 ```solidity
-function getPositionPacketClaimTime(uint256 positionId) external view returns (uint256)
+function getPositionLockSettings(uint256 positionId) external view returns (struct BuyLockSettings)
 ```
 
