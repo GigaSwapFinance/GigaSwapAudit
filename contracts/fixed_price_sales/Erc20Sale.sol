@@ -411,7 +411,9 @@ contract Erc20Sale is IErc20Sale {
             if (lockSettings.receivePercent > 0) {
                 uint256 sendCount = (data.buyToTransfer *
                     lockSettings.receivePercent) / LOCK_PRECISION;
-                IERC20(pos.asset1).safeTransfer(to, sendCount);
+                uint256 fee = feeSettings.feeForCount(to, sendCount);
+                if (fee > 0) IERC20(pos.asset1).safeTransfer(to, fee);
+                IERC20(pos.asset1).safeTransfer(to, sendCount - fee);
                 data.buyToTransfer -= sendCount;
             }
             locker.lockStepByStepUnlocking(
