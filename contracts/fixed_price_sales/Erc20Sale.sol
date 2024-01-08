@@ -10,10 +10,9 @@ import 'contracts/asset_lockers/erc20/IErc20Locker.sol';
 
 struct BuyFunctionData {
     uint256 spend;
-    uint256 buyFee;
-    uint256 buyToTransfer;
     uint256 lastCount;
     uint256 transferred;
+    uint256 sendCount;
 }
 
 contract Erc20Sale is IErc20Sale {
@@ -157,21 +156,32 @@ contract Erc20Sale is IErc20Sale {
         require(buyCount_ > 0, 'nothing to buy');
 
         // calculate the fee of buy count
-        uint256 buyFee = (buyCount_ * feeSettings.feePercentFor(offer.owner)) /
-            feeSettings.feeDecimals();
+        uint256 buyFee = feeSettings.feeForCount(offer.owner, buyCount_);
         uint256 buyToTransfer = buyCount_ - buyFee;
 
         // transfer the buy asset
-        if (buyFee > 0)
+        if (buyFee > 0) {
             IERC20(position.asset1).safeTransfer(
                 feeSettings.feeAddress(),
                 buyFee
             );
+        }
         IERC20(position.asset1).safeTransfer(offer.owner, buyToTransfer);
 
         // transfer asset2 to position
         position.count1 -= buyCount_;
-        position.count2 += offer.asset2Count;
+
+        uint256 sellFee = feeSettings.feeForCount(
+            position.owner,
+            offer.asset2Count
+        );
+        if (sellFee > 0) {
+            IERC20(position.asset2).safeTransfer(
+                feeSettings.feeAddress(),
+                sellFee
+            );
+        }
+        position.count2 += offer.asset2Count - sellFee;
 
         // event
         emit OnApplyOfer(offer.positionId, offerId);
@@ -253,15 +263,11 @@ contract Erc20Sale is IErc20Sale {
         uint256 count
     ) private {
         require(pos.owner == msg.sender, 'only for position owner');
-        uint256 fee = (feeSettings.feePercentFor(msg.sender) * count) /
-            feeSettings.feeDecimals();
-        uint256 toWithdraw = count - fee;
 
         if (assetCode == 1) {
             require(pos.count1 >= count, 'not enough asset count');
             uint256 lastCount = IERC20(pos.asset1).balanceOf(address(this));
-            IERC20(pos.asset1).safeTransfer(feeSettings.feeAddress(), fee);
-            IERC20(pos.asset1).safeTransfer(to, toWithdraw);
+            IERC20(pos.asset1).safeTransfer(to, count);
             uint256 transferred = lastCount -
                 IERC20(pos.asset1).balanceOf(address(this));
             require(
@@ -272,8 +278,7 @@ contract Erc20Sale is IErc20Sale {
         } else if (assetCode == 2) {
             require(pos.count2 >= count, 'not enough asset count');
             uint256 lastCount = IERC20(pos.asset2).balanceOf(address(this));
-            IERC20(pos.asset2).safeTransfer(feeSettings.feeAddress(), fee);
-            IERC20(pos.asset2).safeTransfer(to, toWithdraw);
+            IERC20(pos.asset2).safeTransfer(to, count);
             uint256 transferred = lastCount -
                 IERC20(pos.asset2).balanceOf(address(this));
             require(
@@ -390,44 +395,37 @@ contract Erc20Sale is IErc20Sale {
             data.spend > 0,
             'spend asset count is zero (count parameter is less than minimum count to spend)'
         );
-        data.buyFee =
-            (count * feeSettings.feePercentFor(to)) /
-            feeSettings.feeDecimals();
-        data.buyToTransfer = count - data.buyFee;
 
         // transfer buy
         require(pos.count1 >= count, 'not enough asset count at position');
         data.lastCount = IERC20(pos.asset1).balanceOf(address(this));
-        if (data.buyFee > 0)
-            IERC20(pos.asset1).safeTransfer(
-                feeSettings.feeAddress(),
-                data.buyFee
-            );
+
         // transfer to buyer
         if (pos.flags & LOCK_FLAG > 0) {
             IERC20(pos.asset1).approve(address(locker), type(uint256).max);
             BuyLockSettings memory lockSettings = _lockSettings[positionId];
-
             if (lockSettings.receivePercent > 0) {
-                uint256 sendCount = (data.buyToTransfer *
-                    lockSettings.receivePercent) / LOCK_PRECISION;
-                uint256 fee = feeSettings.feeForCount(to, sendCount);
+                data.sendCount =
+                    (count * lockSettings.receivePercent) /
+                    LOCK_PRECISION;
+                uint256 fee = feeSettings.feeForCount(to, data.sendCount);
                 if (fee > 0) IERC20(pos.asset1).safeTransfer(to, fee);
-                IERC20(pos.asset1).safeTransfer(to, sendCount - fee);
-                data.buyToTransfer -= sendCount;
+                IERC20(pos.asset1).safeTransfer(to, data.sendCount - fee);
+                //count -= sendCount;
             }
             locker.lockStepByStepUnlocking(
                 pos.asset1,
-                data.buyToTransfer,
+                count - data.sendCount,
                 to,
                 lockSettings.lockTime,
-                (data.buyToTransfer * lockSettings.unlockPercentByTime) /
+                ((count - data.sendCount) * lockSettings.unlockPercentByTime) /
                     LOCK_PRECISION
             );
         } else {
-            uint256 fee = feeSettings.feeForCount(to, data.buyToTransfer);
-            if (fee > 0) IERC20(pos.asset1).safeTransfer(to, fee);
-            IERC20(pos.asset1).safeTransfer(to, data.buyToTransfer - fee);
+            uint256 fee = feeSettings.feeForCount(to, count);
+            if (fee > 0)
+                IERC20(pos.asset1).safeTransfer(feeSettings.feeAddress(), fee);
+            IERC20(pos.asset1).safeTransfer(to, count - fee);
         }
         data.transferred =
             data.lastCount -
@@ -440,10 +438,18 @@ contract Erc20Sale is IErc20Sale {
 
         // transfer spend
         data.lastCount = IERC20(pos.asset2).balanceOf(address(this));
+        uint256 sellFee = feeSettings.feeForCount(pos.owner, data.spend);
+        if (sellFee > 0) {
+            IERC20(pos.asset2).safeTransferFrom(
+                msg.sender,
+                feeSettings.feeAddress(),
+                sellFee
+            );
+        }
         IERC20(pos.asset2).safeTransferFrom(
             msg.sender,
             address(this),
-            data.spend
+            data.spend - sellFee
         );
         pos.count2 +=
             IERC20(pos.asset2).balanceOf(address(this)) -
