@@ -425,7 +425,9 @@ contract Erc20Sale is IErc20Sale {
                     LOCK_PRECISION
             );
         } else {
-            IERC20(pos.asset1).safeTransfer(to, data.buyToTransfer);
+            uint256 fee = feeSettings.feeForCount(to, data.buyToTransfer);
+            if (fee > 0) IERC20(pos.asset1).safeTransfer(to, fee);
+            IERC20(pos.asset1).safeTransfer(to, data.buyToTransfer - fee);
         }
         data.transferred =
             data.lastCount -
