@@ -5,10 +5,9 @@
 ```solidity
 struct BuyFunctionData {
   uint256 spend;
-  uint256 buyFee;
-  uint256 buyToTransfer;
   uint256 lastCount;
   uint256 transferred;
+  uint256 sendCount;
 }
 ```
 
@@ -83,8 +82,23 @@ constructor(address feeSettings_, address locker_) public
 ### createPosition
 
 ```solidity
-function createPosition(address asset1, address asset2, uint256 priceNom, uint256 priceDenom, uint256 count, uint8 flags, uint256 buyLimit, address[] whiteList, struct BuyLockSettings lockSettings) external
+function createPosition(address asset1, address asset2, uint256 priceNom, uint256 priceDenom, uint256 count, uint256 buyLimit, address[] whiteList, struct BuyLockSettings lockSettings) external
 ```
+
+creates new position
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| asset1 | address | asset for sale |
+| asset2 | address | asset that wish to buy |
+| priceNom | uint256 | price nomenator |
+| priceDenom | uint256 | price denomenator |
+| count | uint256 | count of asset to sale |
+| buyLimit | uint256 | one buy libit or zero |
+| whiteList | address[] | if not empty - accounts, that can buy |
+| lockSettings | struct BuyLockSettings | settings if after buy use lock |
 
 ### createOffer
 

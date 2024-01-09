@@ -54,8 +54,16 @@ uint256 LOCK_PRECISION
 ### OnCreate
 
 ```solidity
-event OnCreate(uint256 positionId, address owner, address asset1, address asset2, uint256 priceNom, uint256 priceDenom)
+event OnCreate(uint256 positionId)
 ```
+
+when position created
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| positionId | uint256 | id of position |
 
 ### OnBuy
 
@@ -63,11 +71,29 @@ event OnCreate(uint256 positionId, address owner, address asset1, address asset2
 event OnBuy(uint256 positionId, address account, uint256 count)
 ```
 
+when buy happens
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| positionId | uint256 | id of position |
+| account | address | buyer |
+| count | uint256 | buy count |
+
 ### OnPrice
 
 ```solidity
-event OnPrice(uint256 positionId, uint256 priceNom, uint256 priceDenom)
+event OnPrice(uint256 positionId)
 ```
+
+position price changed
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| positionId | uint256 | id of position |
 
 ### OnWithdraw
 
@@ -75,11 +101,32 @@ event OnPrice(uint256 positionId, uint256 priceNom, uint256 priceDenom)
 event OnWithdraw(uint256 positionId, uint256 assetCode, address to, uint256 count)
 ```
 
+owner withdraw asset from position
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| positionId | uint256 | id of position |
+| assetCode | uint256 | asset code |
+| to | address | address to withdraw |
+| count | uint256 | asset count |
+
 ### OnWhiteListed
 
 ```solidity
 event OnWhiteListed(uint256 positionId, bool isWhiteListed, address[] accounts)
 ```
+
+white list is changed
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| positionId | uint256 | id of position |
+| isWhiteListed | bool | witelisted or not |
+| accounts | address[] | accounts list |
 
 ### OnWhiteListEnabled
 
@@ -87,11 +134,29 @@ event OnWhiteListed(uint256 positionId, bool isWhiteListed, address[] accounts)
 event OnWhiteListEnabled(uint256 positionId, bool enabled)
 ```
 
+white list is enabled
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| positionId | uint256 | id of position |
+| enabled | bool | enabled or not |
+
 ### OnBuyLimitEnable
 
 ```solidity
 event OnBuyLimitEnable(uint256 positionId, bool enable)
 ```
+
+buy limit is enabled
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| positionId | uint256 | id of position |
+| enable | bool | enabled or not |
 
 ### OnBuyLimit
 
@@ -99,11 +164,35 @@ event OnBuyLimitEnable(uint256 positionId, bool enable)
 event OnBuyLimit(uint256 positionId, uint256 limit)
 ```
 
+buy limit is changed
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| positionId | uint256 | id of position |
+| limit | uint256 | new buy limit |
+
 ### createPosition
 
 ```solidity
-function createPosition(address asset1, address asset2, uint256 priceNom, uint256 priceDenom, uint256 count, uint8 flags, uint256 buyLimit, address[] whiteList, struct BuyLockSettings lockSettings) external
+function createPosition(address asset1, address asset2, uint256 priceNom, uint256 priceDenom, uint256 count, uint256 buyLimit, address[] whiteList, struct BuyLockSettings lockSettings) external
 ```
+
+creates new position
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| asset1 | address | asset for sale |
+| asset2 | address | asset that wish to buy |
+| priceNom | uint256 | price nomenator |
+| priceDenom | uint256 | price denomenator |
+| count | uint256 | count of asset to sale |
+| buyLimit | uint256 | one buy libit or zero |
+| whiteList | address[] | if not empty - accounts, that can buy |
+| lockSettings | struct BuyLockSettings | settings if after buy use lock |
 
 ### addBalance
 

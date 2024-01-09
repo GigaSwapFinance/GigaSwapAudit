@@ -10,13 +10,21 @@ uint8 constant BUYLIMIT_FLAG = 1 << 1;
 /// @dev buy sends token to lock
 uint8 constant LOCK_FLAG = 1 << 2;
 
+/// @title the position main data
 struct PositionData {
+    /// @notice position owner
     address owner;
+    /// @notice asset address, that sells owner
     address asset1;
+    /// @notice asset address, that owner wish to buy
     address asset2;
+    /// @notice price nomenator
     uint256 priceNom;
+    /// @notice price denomenator
     uint256 priceDenom;
+    /// @notice asset1 count
     uint256 count1;
+    /// @notice asset2 count
     uint256 count2;
     /// @dev flags
     /// 0 - WHITELIST_FLAG has whiteList
@@ -41,47 +49,71 @@ struct BuyLockSettings {
 /// @dev precision for lock after buy (0.01% ie. 100%=10000)
 uint256 constant LOCK_PRECISION = 10000;
 
+/// @title erc20sale contract
 interface IErc20Sale is IErc20SaleCounterOffer {
-    event OnCreate(
-        uint256 indexed positionId,
-        address indexed owner,
-        address asset1,
-        address asset2,
-        uint256 priceNom,
-        uint256 priceDenom
-    );
+    /// @notice when position created
+    /// @param positionId id of position
+    event OnCreate(uint256 indexed positionId);
+    /// @notice when buy happens
+    /// @param positionId id of position
+    /// @param account buyer
+    /// @param count buy count
     event OnBuy(
         uint256 indexed positionId,
         address indexed account,
         uint256 count
     );
-    event OnPrice(
-        uint256 indexed positionId,
-        uint256 priceNom,
-        uint256 priceDenom
-    );
+    /// @notice position price changed
+    /// @param positionId id of position
+    event OnPrice(uint256 indexed positionId);
+    /// @notice owner withdraw asset from position
+    /// @param positionId id of position
+    /// @param assetCode asset code
+    /// @param to address to withdraw
+    /// @param count asset count
     event OnWithdraw(
         uint256 indexed positionId,
         uint256 assetCode,
         address to,
         uint256 count
     );
+    /// @notice white list is changed
+    /// @param positionId id of position
+    /// @param isWhiteListed witelisted or not
+    /// @param accounts accounts list
     event OnWhiteListed(
         uint256 indexed positionId,
         bool isWhiteListed,
         address[] accounts
     );
+    /// @notice white list is enabled
+    /// @param positionId id of position
+    /// @param enabled enabled or not
     event OnWhiteListEnabled(uint256 indexed positionId, bool enabled);
+    /// @notice buy limit is enabled
+    /// @param positionId id of position
+    /// @param enable enabled or not
     event OnBuyLimitEnable(uint256 indexed positionId, bool enable);
+    /// @notice buy limit is changed
+    /// @param positionId id of position
+    /// @param limit new buy limit
     event OnBuyLimit(uint256 indexed positionId, uint256 limit);
 
+    /// @notice creates new position
+    /// @param asset1 asset for sale
+    /// @param asset2 asset that wish to buy
+    /// @param priceNom price nomenator
+    /// @param priceDenom price denomenator
+    /// @param count count of asset to sale
+    /// @param buyLimit one buy libit or zero
+    /// @param whiteList if not empty - accounts, that can buy
+    /// @param lockSettings settings if after buy use lock
     function createPosition(
         address asset1,
         address asset2,
         uint256 priceNom,
         uint256 priceDenom,
         uint256 count,
-        uint8 flags,
         uint256 buyLimit,
         address[] calldata whiteList,
         BuyLockSettings calldata lockSettings

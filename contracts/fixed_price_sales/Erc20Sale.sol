@@ -40,16 +40,22 @@ contract Erc20Sale is IErc20Sale {
         uint256 priceNom,
         uint256 priceDenom,
         uint256 count,
-        uint8 flags,
+        //uint8 flags,
         uint256 buyLimit,
         address[] calldata whiteList,
         BuyLockSettings calldata lockSettings
     ) external {
+        uint8 flags = 0;
         if (count > 0) {
             uint256 lastCount = IERC20(asset1).balanceOf(address(this));
             IERC20(asset1).safeTransferFrom(msg.sender, address(this), count);
             count = IERC20(asset1).balanceOf(address(this)) - lastCount;
         }
+
+        // calculate position flags
+        if (buyLimit > 0) flags |= BUYLIMIT_FLAG;
+        if (whiteList.length > 0) flags |= WHITELIST_FLAG;
+        if (lockSettings.lockTime > 0) flags |= LOCK_FLAG;
 
         _positions[++_totalPositions] = PositionData(
             msg.sender,
@@ -80,14 +86,7 @@ contract Erc20Sale is IErc20Sale {
         for (uint256 i = 0; i < whiteList.length; ++i)
             _whiteLists[_totalPositions][whiteList[i]] = true;
 
-        emit OnCreate(
-            _totalPositions,
-            msg.sender,
-            asset1,
-            asset2,
-            priceNom,
-            priceDenom
-        );
+        emit OnCreate(_totalPositions);
     }
 
     function createOffer(
@@ -143,45 +142,64 @@ contract Erc20Sale is IErc20Sale {
         offer.state = 2;
 
         // get position data
-        PositionData storage position = _positions[offer.positionId];
-        require(position.owner != address(0), 'position is not exists');
-        require(position.owner == msg.sender, 'only owner can apply offer');
+        PositionData storage pos = _positions[offer.positionId];
+        require(pos.owner != address(0), 'position is not exists');
+        require(pos.owner == msg.sender, 'only owner can apply offer');
 
         // buyCount
         uint256 buyCount_ = offer.asset1Count;
         require(
-            buyCount_ <= position.count1,
+            buyCount_ <= pos.count1,
             'not enough owner asset to apply offer'
         );
         require(buyCount_ > 0, 'nothing to buy');
 
-        // calculate the fee of buy count
-        uint256 buyFee = feeSettings.feeForCount(offer.owner, buyCount_);
-        uint256 buyToTransfer = buyCount_ - buyFee;
-
         // transfer the buy asset
-        if (buyFee > 0) {
-            IERC20(position.asset1).safeTransfer(
-                feeSettings.feeAddress(),
-                buyFee
+        if (pos.flags & LOCK_FLAG > 0) {
+            IERC20(pos.asset1).approve(address(locker), type(uint256).max);
+            BuyLockSettings memory lockSettings = _lockSettings[
+                offer.positionId
+            ];
+            uint256 sendCount = (buyCount_ * lockSettings.receivePercent) /
+                LOCK_PRECISION;
+            if (sendCount > 0) {
+                uint256 fee = feeSettings.feeForCount(offer.owner, sendCount);
+                if (fee > 0)
+                    IERC20(pos.asset1).safeTransfer(
+                        feeSettings.feeAddress(),
+                        fee
+                    );
+                IERC20(pos.asset1).safeTransfer(offer.owner, sendCount - fee);
+            }
+            locker.lockStepByStepUnlocking(
+                pos.asset1,
+                buyCount_ - sendCount,
+                offer.owner,
+                lockSettings.lockTime,
+                ((buyCount_ - sendCount) * lockSettings.unlockPercentByTime) /
+                    LOCK_PRECISION
             );
+        } else {
+            // calculate the fee of buy count
+            uint256 buyFee = feeSettings.feeForCount(offer.owner, buyCount_);
+            if (buyFee > 0) {
+                IERC20(pos.asset1).safeTransfer(
+                    feeSettings.feeAddress(),
+                    buyFee
+                );
+            }
+            // transfer buy asset
+            IERC20(pos.asset1).safeTransfer(offer.owner, buyCount_ - buyFee);
         }
-        IERC20(position.asset1).safeTransfer(offer.owner, buyToTransfer);
 
         // transfer asset2 to position
-        position.count1 -= buyCount_;
+        pos.count1 -= buyCount_;
 
-        uint256 sellFee = feeSettings.feeForCount(
-            position.owner,
-            offer.asset2Count
-        );
+        uint256 sellFee = feeSettings.feeForCount(pos.owner, offer.asset2Count);
         if (sellFee > 0) {
-            IERC20(position.asset2).safeTransfer(
-                feeSettings.feeAddress(),
-                sellFee
-            );
+            IERC20(pos.asset2).safeTransfer(feeSettings.feeAddress(), sellFee);
         }
-        position.count2 += offer.asset2Count - sellFee;
+        pos.count2 += offer.asset2Count - sellFee;
 
         // event
         emit OnApplyOfer(offer.positionId, offerId);
@@ -300,7 +318,7 @@ contract Erc20Sale is IErc20Sale {
         require(pos.owner == msg.sender, 'only for position owner');
         pos.priceNom = priceNom;
         pos.priceDenom = priceDenom;
-        emit OnPrice(positionId, priceNom, priceDenom);
+        emit OnPrice(positionId);
     }
 
     function setWhiteList(
@@ -404,14 +422,17 @@ contract Erc20Sale is IErc20Sale {
         if (pos.flags & LOCK_FLAG > 0) {
             IERC20(pos.asset1).approve(address(locker), type(uint256).max);
             BuyLockSettings memory lockSettings = _lockSettings[positionId];
-            if (lockSettings.receivePercent > 0) {
-                data.sendCount =
-                    (count * lockSettings.receivePercent) /
-                    LOCK_PRECISION;
+            data.sendCount =
+                (count * lockSettings.receivePercent) /
+                LOCK_PRECISION;
+            if (data.sendCount > 0) {
                 uint256 fee = feeSettings.feeForCount(to, data.sendCount);
-                if (fee > 0) IERC20(pos.asset1).safeTransfer(to, fee);
+                if (fee > 0)
+                    IERC20(pos.asset1).safeTransfer(
+                        feeSettings.feeAddress(),
+                        fee
+                    );
                 IERC20(pos.asset1).safeTransfer(to, data.sendCount - fee);
-                //count -= sendCount;
             }
             locker.lockStepByStepUnlocking(
                 pos.asset1,

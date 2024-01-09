@@ -2,7 +2,7 @@ const { expect } = require("chai");
 const { Up, Days, Seconds } = require("./Helpers/TimeHelper");
 const { BigNumber } = require("bignumber.js");
 
-describe("Erc20Sale:", function () {
+describe("Erc20Sale StepByStepLock:", function () {
     let owner;
     let acc1;
     let acc2;
@@ -25,7 +25,6 @@ describe("Erc20Sale:", function () {
         var positionId;
         var position;
         const token1Count = 1000;
-        const positionFlags = 4;
         const priceNom = 2;
         const pricceDenom = 1;
         const buyLimit = 0;
@@ -40,11 +39,14 @@ describe("Erc20Sale:", function () {
             await token1.mint(token1Count);
             await token1.approve(erc20Sale.address, token1Count);
 
-            await expect(erc20Sale.createPosition(token1.address, token2.address, priceNom, pricceDenom, token1Count, positionFlags, buyLimit, whiteList, lockSettings))
-                .to.emit(erc20Sale, 'OnCreate')
-                .withArgs(1, owner.address, token1.address, token2.address, priceNom, pricceDenom);
+            await expect(erc20Sale.createPosition(token1.address, token2.address, priceNom, pricceDenom, token1Count, buyLimit, whiteList, lockSettings))
+                .to.emit(erc20Sale, 'OnCreate').withArgs(1);
             positionId = 1;
             position = await erc20Sale.getPosition(positionId);
+        });
+        it("проверка флагов", async () => {
+            var position = await erc20Sale.getPosition(positionId);
+            expect(position.flags).to.eq(4);
         });
         it("получаем опции лока для позиции", async () => {
             const lockSettingsResponce = await erc20Sale.getPositionLockSettings(positionId);
@@ -130,15 +132,12 @@ describe("Erc20Sale:", function () {
             await token1.mint(3 * token1Count);
             await token1.approve(erc20Sale.address, 3 * token1Count);
 
-            await expect(erc20Sale.createPosition(token1.address, token2.address, priceNom, pricceDenom, token1Count, positionFlags, buyLimit, whiteList, lockSettings))
-                .to.emit(erc20Sale, 'OnCreate')
-                .withArgs(2, owner.address, token1.address, token2.address, priceNom, pricceDenom);
-            await expect(erc20Sale.createPosition(token1.address, token2.address, priceNom, pricceDenom, token1Count, positionFlags, buyLimit, whiteList, lockSettings))
-                .to.emit(erc20Sale, 'OnCreate')
-                .withArgs(3, owner.address, token1.address, token2.address, priceNom, pricceDenom);
-            await expect(erc20Sale.createPosition(token1.address, token2.address, priceNom, pricceDenom, token1Count, positionFlags, buyLimit, whiteList, lockSettings))
-                .to.emit(erc20Sale, 'OnCreate')
-                .withArgs(4, owner.address, token1.address, token2.address, priceNom, pricceDenom);
+            await expect(erc20Sale.createPosition(token1.address, token2.address, priceNom, pricceDenom, token1Count, buyLimit, whiteList, lockSettings))
+                .to.emit(erc20Sale, 'OnCreate').withArgs(2);
+            await expect(erc20Sale.createPosition(token1.address, token2.address, priceNom, pricceDenom, token1Count, buyLimit, whiteList, lockSettings))
+                .to.emit(erc20Sale, 'OnCreate').withArgs(3);
+            await expect(erc20Sale.createPosition(token1.address, token2.address, priceNom, pricceDenom, token1Count, buyLimit, whiteList, lockSettings))
+                .to.emit(erc20Sale, 'OnCreate').withArgs(4);
         });
         it("закуп создает лок, который можно забрать по прошествии указанного времни, при создании позиции", async () => {
             const buyCount = 100;
@@ -239,9 +238,10 @@ describe("Erc20Sale:", function () {
                         .to.emit(erc20Sale, 'OnApplyOfer')
                         .withArgs(positionId, 1);
                 });
-                it("токены овнера отправились предлагавшей стороне, предложеное так и остается", async () => {
+                it("токены овнера отправились частично на лок, частично купившему", async () => {
                     expect(await token1.balanceOf(erc20Sale.address)).to.eq(0);
-                    expect(await token1.balanceOf(acc2.address)).to.eq(token1OfferCount);
+                    expect(await token1.balanceOf(acc2.address)).to.eq(200);
+                    expect(await token1.balanceOf(locker.address)).to.eq(800);
                 });
                 it("токены предлагавшей стороны все еще лежат на контракте торговли, до востребования", async () => {
                     expect(await token2.balanceOf(erc20Sale.address)).to.eq(token2OfferCount);
@@ -271,6 +271,107 @@ describe("Erc20Sale:", function () {
                         .to.be.revertedWith('not enough asset count');
                 });
             });
+        });
+    });
+    describe("покупка 100000 штук (если платим полный налог) через офер", function () {
+        const buyCount = 100000;
+        var token1;
+        var token2;
+        var positionId;
+        var position;
+        const token1Count = buyCount;
+        const priceNom = 2;
+        const pricceDenom = 1;
+        const buyLimit = 0;
+        const whiteList = [];
+        const token1OfferCount = buyCount;
+        const token2OfferCount = buyCount;
+        const packetClaimTime = 123;
+        const lockSettings = [LOCK_PRECISION / 5, packetClaimTime, LOCK_PRECISION / 10];
+
+        beforeEach(async () => {
+            await giga.connect(addrs[3]).mint(100);
+
+            // создаем позицию
+            token1 = await (await ethers.getContractFactory("Erc20TestToken")).deploy(18);
+            token2 = await (await ethers.getContractFactory("Erc20TestToken")).deploy(6);
+
+            await token1.mint(token1Count);
+            await token1.approve(erc20Sale.address, token1Count);
+
+            await expect(erc20Sale.createPosition(token1.address, token2.address, priceNom, pricceDenom, token1Count, buyLimit, whiteList, lockSettings))
+                .to.emit(erc20Sale, 'OnCreate').withArgs(1);
+            positionId = 1;
+            position = await erc20Sale.getPosition(positionId);
+
+            // создаем офер
+            await token2.connect(acc2).mint(token2OfferCount);
+            await token2.connect(acc2).approve(erc20Sale.address, token2OfferCount);
+            await expect(erc20Sale.connect(acc2).createOffer(1, token1OfferCount, token2OfferCount))
+                .to.emit(erc20Sale, 'OnOfer')
+                .withArgs(positionId, 1);
+
+            // принимаем офер
+            await expect(erc20Sale.applyOffer(1))
+                .to.emit(erc20Sale, 'OnApplyOfer')
+                .withArgs(positionId, 1);
+        });
+        it("проверка покупки", async () => {
+            var position = await erc20Sale.getPosition(positionId);
+            expect(position.owner).to.eq(owner.address);
+            expect(position.asset1).to.eq(token1.address);
+            expect(position.asset2).to.eq(token2.address);
+            expect(position.count1).to.eq(0);
+            expect(position.count2).to.eq(99700); // with fee
+            expect(position.priceNom).to.eq(2);
+            expect(position.priceDenom).to.eq(1);
+
+            expect(await token1.balanceOf(owner.address)).to.eq(300); // fee
+            expect(await token1.balanceOf(erc20Sale.address)).to.eq(0);
+            expect(await token1.balanceOf(acc2.address)).to.eq(19940); // without fee
+
+            expect(await token2.balanceOf(owner.address)).to.eq(300); // fee
+            expect(await token2.balanceOf(erc20Sale.address)).to.eq(99700); // with fee
+            expect(await token2.balanceOf(acc2.address)).to.eq(0);
+        });
+        it("что не перешло сразу покупателю - все пошло на лок (налог списан во время лока)", async () => {
+            expect(await token1.balanceOf(locker.address)).to.eq(79760);
+        });
+        it("тот, кто купил не получает весь токен - только часть минус налог", async () => {
+            expect(await token1.balanceOf(acc2.address)).to.eq(19940);
+        });
+        it("тот, кто купил - получает токен в лок", async () => {
+            const lockPositionId = 1;
+            const lockPosition = await locker.position(lockPositionId);
+            expect(lockPosition.count).to.eq(79760); // without sell and fee
+        });
+        it("проверка лока", async () => {
+            const lockPositionId = 1;
+            const lockPosition = await locker.position(lockPositionId);
+            expect(lockPosition.token).to.eq(token1.address);
+            expect(lockPosition.withdrawer).to.eq(acc2.address);
+            expect(lockPosition.timeInterval).to.eq(packetClaimTime);
+            expect(lockPosition.withdrawedCount).to.eq(0);
+            expect(lockPosition.count).to.eq(79760); // without sell and fee
+            expect(lockPosition.stepByStepUnlockCount).to.eq(8000);
+        });
+        it("проверка покупки", async () => {
+            var position = await erc20Sale.getPosition(positionId);
+            expect(position.owner).to.eq(owner.address);
+            expect(position.asset1).to.eq(token1.address);
+            expect(position.asset2).to.eq(token2.address);
+            expect(position.count1).to.eq(0);
+            expect(position.count2).to.eq(99700);
+            expect(position.priceNom).to.eq(2);
+            expect(position.priceDenom).to.eq(1);
+
+            expect(await token1.balanceOf(owner.address)).to.eq(300);// fee
+            expect(await token1.balanceOf(erc20Sale.address)).to.eq(0);
+            expect(await token1.balanceOf(acc2.address)).to.eq(19940); // without fee
+
+            expect(await token2.balanceOf(owner.address)).to.eq(300);// fee
+            expect(await token2.balanceOf(erc20Sale.address)).to.eq(99700);// without fee
+            expect(await token2.balanceOf(acc2.address)).to.eq(0);
         });
     });
 });
