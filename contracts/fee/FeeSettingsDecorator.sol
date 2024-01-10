@@ -3,6 +3,7 @@ pragma solidity ^0.8.17;
 
 import './IFeeSettings.sol';
 
+/// @dev the decorator pattern for FeeSettings
 contract FeeSettingsDecorator is IFeeSettings {
     IFeeSettings public immutable feeSettings;
 

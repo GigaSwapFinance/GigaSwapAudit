@@ -4,7 +4,7 @@ pragma solidity ^0.8.17;
 import './Erc20Sale.sol';
 import '../weth/IgWETH.sol';
 
-/// @dev wrapper 
+/// @dev wrapper of Erc20Sale for ethereum transactions
 contract Erc20SaleWeth {
     Erc20Sale immutable _sale;
     IgWETH immutable _weth;

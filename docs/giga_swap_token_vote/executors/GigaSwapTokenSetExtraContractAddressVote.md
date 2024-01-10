@@ -20,6 +20,10 @@ constructor(address voteAddress, address writerAddress) public
 function startVote(address newValue) external payable
 ```
 
+starts the vote
+
+_newValue new ExtraContractAddress_
+
 ### _execute
 
 ```solidity

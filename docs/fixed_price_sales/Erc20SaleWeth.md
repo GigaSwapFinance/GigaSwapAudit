@@ -2,7 +2,7 @@
 
 ## Erc20SaleWeth
 
-_wrapper_
+_wrapper of Erc20Sale for ethereum transactions_
 
 ### _sale
 

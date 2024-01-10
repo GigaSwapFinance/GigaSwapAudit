@@ -3,6 +3,7 @@ pragma solidity ^0.8.17;
 
 import '../ownable/IOwnable.sol';
 
+/// @title if contract has factories
 interface IHasFactories is IOwnable {
     /// @dev returns true, if address is factory
     function isFactory(address addr) external view returns (bool);

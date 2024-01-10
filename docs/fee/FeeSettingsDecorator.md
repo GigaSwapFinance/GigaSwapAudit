@@ -2,6 +2,8 @@
 
 ## FeeSettingsDecorator
 
+_the decorator pattern for FeeSettings_
+
 ### feeSettings
 
 ```solidity

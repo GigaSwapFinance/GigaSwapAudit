@@ -29,6 +29,15 @@ constructor(address voteAddress, address writerAddress) public
 function startVote(uint256 thisSharePpm, uint256 stackingSharePpm) external payable
 ```
 
+starts the vote
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| thisSharePpm | uint256 | new thisSharePpm |
+| stackingSharePpm | uint256 | new stackingSharePpm |
+
 ### _execute
 
 ```solidity

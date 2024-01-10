@@ -4,6 +4,7 @@ pragma solidity ^0.8.17;
 import 'contracts/fee/IFeeSettingsSetters.sol';
 import 'contracts/votes/VoteExecutorBase.sol';
 
+/// @title the vote executor, that executes setFeeEth for GigaSwap system fee settings
 contract FeeSettingsSetFeeEthVote is VoteExecutorBase {
     mapping(uint256 => uint256) public data;
 
@@ -12,6 +13,7 @@ contract FeeSettingsSetFeeEthVote is VoteExecutorBase {
         address writerAddress
     ) VoteExecutorBase(voteAddress, writerAddress) {}
 
+    /// @notice starts the vote
     function startVote(uint256 newValue) external payable {
         (uint256 voteId, ) = _startVote(msg.value, msg.sender);
         data[voteId] = newValue;

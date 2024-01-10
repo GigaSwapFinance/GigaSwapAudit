@@ -20,6 +20,8 @@ constructor(address voteAddress, address writerAddress) public
 function startVote(uint256 newValue) external payable
 ```
 
+starts the vote
+
 ### _execute
 
 ```solidity

@@ -4,6 +4,8 @@ pragma solidity ^0.8.17;
 import './IGigaSwapTokenSetters.sol';
 import 'contracts/lib/factories/HasFactories.sol';
 
+/// @title the writer for giga swap settings by votes
+/// @dev when is owner of contract - it can change contract properties that onlyOwner
 contract GigaSwapTokenWriter is HasFactories, IGigaSwapTokenSetters {
     IGigaSwapTokenSetters public immutable token;
 

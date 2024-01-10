@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.17;
 
+/// @title the fee settings of GigaSwap system interface
 interface IFeeSettings {
     /// @notice address to pay fee
     function feeAddress() external view returns (address);

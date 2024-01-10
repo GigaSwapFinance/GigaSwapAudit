@@ -4,6 +4,7 @@ pragma solidity ^0.8.17;
 import 'contracts/votes/VoteExecutorBase.sol';
 import '../IGigaSwapTokenSetters.sol';
 
+/// @title setWithdrawAddress vote ececutor
 contract GigaSwapTokenSetWithdrawAddressVote is VoteExecutorBase {
     mapping(uint256 => address) public data;
 
@@ -12,6 +13,8 @@ contract GigaSwapTokenSetWithdrawAddressVote is VoteExecutorBase {
         address writerAddress
     ) VoteExecutorBase(voteAddress, writerAddress) {}
 
+    /// @notice starts the vote
+    /// @param newValue new WithdrawAddress
     function startVote(address newValue) external payable {
         (uint256 voteId, ) = _startVote(msg.value, msg.sender);
         data[voteId] = newValue;

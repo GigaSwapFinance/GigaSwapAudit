@@ -1,11 +1,15 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.17;
 
+/// @title stacking contract stack data
 struct Stack {
-    uint256 count; // the stack size
-    uint256 creationInterval; // creation or edit interval
+    /// @dev the stack size
+    uint256 count;
+    /// @dev creation or edit interval
+    uint256 creationInterval;
 }
 
+/// @title stacking contract
 interface IFarming {
     /// @dev account added stack count
     event OnAddStack(address indexed account, Stack stack, uint256 count);
