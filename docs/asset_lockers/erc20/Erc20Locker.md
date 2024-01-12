@@ -136,21 +136,6 @@ _internal sets position as withdrawed to prevent re-withdrawal_
 | ---- | ---- | ----------- |
 | id | uint256 | id of position |
 
-### lockPermanent
-
-```solidity
-function lockPermanent(address token, uint256 count) external
-```
-
-permanent locks the erc20 tokens. It can not be withdrawed
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| token | address | token address |
-| count | uint256 | token count without decimals |
-
 ### lockTimeFor
 
 ```solidity

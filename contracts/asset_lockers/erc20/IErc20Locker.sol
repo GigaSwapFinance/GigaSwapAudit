@@ -11,11 +11,6 @@ interface IErc20Locker is IAssetLocker {
     /// @return Erc20LockData the locked position data
     function position(uint256 id) external view returns (Erc20LockData memory);
 
-    /// @notice permanent locks the erc20 tokens. It can not be withdrawed
-    /// @param token token address
-    /// @param count token count without decimals
-    function lockPermanent(address token, uint256 count) external;
-
     /// @notice locks the erc20 tokens, that can be withdrawed by certait address
     /// @param token token address
     /// @param count token count without decimals

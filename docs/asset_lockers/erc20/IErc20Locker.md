@@ -22,21 +22,6 @@ returns the locked position data
 | ---- | ---- | ----------- |
 | [0] | struct Erc20LockData | Erc20LockData the locked position data |
 
-### lockPermanent
-
-```solidity
-function lockPermanent(address token, uint256 count) external
-```
-
-permanent locks the erc20 tokens. It can not be withdrawed
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| token | address | token address |
-| count | uint256 | token count without decimals |
-
 ### lockTimeFor
 
 ```solidity

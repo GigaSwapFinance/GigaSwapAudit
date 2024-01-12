@@ -87,10 +87,6 @@ contract Erc20Locker is AssetLockerBase, IErc20Locker {
         _positions[id].withdrawedCount += _unlockedCountWithdrawAvailable(id);
     }
 
-    function lockPermanent(address token, uint256 count) external {
-        _lock(token, count, 0, address(0));
-    }
-
     function lockTimeFor(
         address token,
         uint256 count,
