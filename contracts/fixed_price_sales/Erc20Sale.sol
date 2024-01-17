@@ -40,7 +40,6 @@ contract Erc20Sale is IErc20Sale {
         uint256 priceNom,
         uint256 priceDenom,
         uint256 count,
-        //uint8 flags,
         uint256 buyLimit,
         address[] calldata whiteList,
         BuyLockSettings calldata lockSettings
@@ -369,6 +368,9 @@ contract Erc20Sale is IErc20Sale {
         _limits[positionId] = limit;
 
         emit OnBuyLimit(positionId, limit);
+    }
+    function getBuyLimit(uint256 positionId) external view returns (uint256){
+        return _limits[positionId];
     }
 
     function buy(

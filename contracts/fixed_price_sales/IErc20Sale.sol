@@ -41,7 +41,7 @@ struct BuyLockSettings {
     /// @notice lock time if unlockPercentByTime==0 or interval for unlock if unlockPercentByTime>0.
     /// @notice If this parameter is 0 than has no lock.
     uint256 lockTime;
-    /// @notice percent for unlock every lockTime. Or 0 if unlock all after lockTime
+    /// @notice percent for unlock every lockTime. Or 0 (or 100%) if unlock all after lockTime
     /// @dev see LOCK_PRECISION
     uint256 unlockPercentByTime;
 }
@@ -158,6 +158,8 @@ interface IErc20Sale is IErc20SaleCounterOffer {
     function enableBuyLimit(uint256 positionId, bool enabled) external;
 
     function setBuyLimit(uint256 positionId, uint256 limit) external;
+
+    function getBuyLimit(uint256 positionId) external view returns (uint256);
 
     function buy(
         uint256 positionId,
